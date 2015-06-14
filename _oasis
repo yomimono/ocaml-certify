@@ -1,0 +1,14 @@
+OASISFormat: 0.4
+Name:        ocaml-selfsign
+Version:     0.1
+License:     ISC
+Authors:     Mindy Preston
+Synopsis:    generate self-signed certificates with ocaml-x509 & ocaml-nocrypto
+Plugins:     META (0.4), DevFiles (0.4)
+BuildTools:  ocamlbuild
+
+Executable selfsign
+ Install: true
+ Path: .
+ MainIs: certify.ml
+ BuildDepends: x509, nocrypto
