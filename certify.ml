@@ -8,6 +8,7 @@ let () =
     let entropy_fd = Unix.openfile src [Unix.O_RDONLY] 0o777 in
     let bytes = Bytes.create 1 in
     let entropy = Unix.read entropy_fd bytes 0 1 in
+    let _ = Unix.close entropy_fd in
     if entropy = 1 then Cstruct.of_string bytes else 
       raise (failwith "Couldn't read entropy!")
   in
@@ -25,5 +26,6 @@ let () =
   let _ = Unix.single_write fd (Cstruct.to_string pem) 0 (Cstruct.len pem) in
   (* seems kind of silly to get a return code when we're also supposed to get a bunch of
      Unix exceptions *)
+  Unix.close fd;
   Printf.printf "key written to %s\n%!" filename
 
