@@ -31,7 +31,7 @@ let () =
   in
   let write_cert dest pem =
     try 
-      let fd = Unix.openfile dest [Unix.O_WRONLY; Unix.O_CREAT] 0o600 in (* TODO: exc handling *)
+      let fd = Unix.openfile dest [Unix.O_WRONLY; Unix.O_CREAT] 0o600 in
       let _written_bytes = Unix.single_write fd (Cstruct.to_string pem) 0 (Cstruct.len pem) in
       (* seems kind of silly to get a return code when we're also supposed to get a bunch of
          Unix exceptions *)
