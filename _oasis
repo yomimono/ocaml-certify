@@ -11,4 +11,4 @@ Executable selfsign
  Install: true
  Path: .
  MainIs: certify.ml
- BuildDepends: x509, nocrypto
+ BuildDepends: x509, nocrypto, cmdliner
