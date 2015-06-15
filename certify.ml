@@ -52,16 +52,18 @@ let write_pem dest pem =
   with
   | Unix.Unix_error (e, _, _) -> translate_error dest e
 
-let certify issuer common_name length days certfile keyfile entropy_src =
+let selfsign common_name length days certfile keyfile entropy_src =
   let entropy_amount = 1 in
   match (seed_rng entropy_src entropy_amount) with
   | Error str -> 
     Printf.eprintf "%s\n" str;
     `Error
   | Ok -> 
+    let issuer = common_name in
     let start,expire = make_dates days in
     let privkey = Nocrypto.Rsa.generate length in
     let csr = X509.CA.generate common_name (`RSA privkey) in 
+    (* it looks like by default we get sha1; can we get sha256 instead? *)
     let cert = X509.CA.sign ~valid_from:start ~valid_until:expire
         csr (`RSA privkey) issuer in
     let cert_pem = X509.Encoding.Pem.Cert.to_pem_cstruct1 cert in
@@ -70,11 +72,8 @@ let certify issuer common_name length days certfile keyfile entropy_src =
     match (write_pem certfile cert_pem, write_pem keyfile key_pem) with
     | Ok, Ok -> `Ok
     | Error str, _ | _, Error str -> Printf.eprintf "%s" str; `Error
-
-let issuer = 
-  let doc = "Entity to list as issuer of the certificate" in
-  Arg.(value & opt string "Yoyodyne Inc" & info ["i"; "issuer" ] ~doc)
-
+(* Issuer and subject are the same for self-signed certificates; for CSRs I
+   expect issuer is blank *)
 let length =
   let doc = "Length of the key in bits." in
   Arg.(value & opt int 2048 & info ["l"; "length"] ~doc)
@@ -93,14 +92,13 @@ let entropy_src =
 
 let common_name = 
   let doc = "Common name for which to issue the certificate." in
-  (* TODO: should probably be required *)
-  Arg.(value & opt string "yoyodyne.xyz" & info ["s"; "subj"; "domain"] ~doc)
+  Arg.(required & pos ~rev:false 0 (some string) None & info [""] ~doc)
 
 let days =
   let doc = "The number of days from the start date on which the certificate will expire." in
   Arg.(value & opt int 365 & info ["d"; "days"] ~doc)
 
-let certify_t = Term.(pure certify $ issuer $ common_name $ length $ days
+let selfsign_t = Term.(pure selfsign $ common_name $ length $ days
                       $ certfile $ keyfile $ entropy_src)
 
 let info =
@@ -110,7 +108,7 @@ let info =
   Term.info "certify" ~doc ~man
 
 let () = 
-  match Term.eval (certify_t, info) with 
+  match Term.eval (selfsign_t, info) with 
   | `Help -> exit 0 (* TODO: not clear to me how we generate this case *)
   | `Version -> exit 0  (* TODO: not clear to me how we generate this case *)
   | `Error _ -> exit 1 
