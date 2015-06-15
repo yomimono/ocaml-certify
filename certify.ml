@@ -20,7 +20,7 @@ let seed_rng entropy_src how_much =
   with
   | Unix.Unix_error(Unix.ENOENT, _, _)
   | Unix.Unix_error(Unix.ENODEV, _, _) -> 
-    Error (Printf.sprintf "source %s doesn't exist -- try another?" entropy_src)
+    Error (Printf.sprintf "entropy source %s doesn't exist -- try another?" entropy_src)
 
 let translate_error dest = function
   | (Unix.EACCES) -> 
