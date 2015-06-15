@@ -38,6 +38,12 @@ let translate_error dest = function
     Write_error (Printf.sprintf "%s is on a read-only filesystem" dest)
   | e -> Write_error (Unix.error_message e)
 
+let make_dates days =
+  let seconds = days * 24 * 60 * 60 in
+  let start = Unix.gmtime (Unix.time ()) in
+  let expire = Unix.gmtime (Unix.time () +. (float_of_int seconds)) in
+  (start, expire)
+
 let write_pem dest pem =
   try 
     let fd = Unix.openfile dest [Unix.O_WRONLY; Unix.O_CREAT] 0o600 in
@@ -50,19 +56,17 @@ let write_pem dest pem =
   with
   | Unix.Unix_error (e, _, _) -> translate_error dest e
 
-let certify issuer common_name length certfile keyfile entropy_src =
+let certify issuer common_name length days certfile keyfile entropy_src =
   let entropy_amount = 1 in
   match (seed_rng entropy_src entropy_amount) with
   | Read_error str -> 
     Printf.eprintf "%s\n" str;
     `Error
   | Ok -> 
+    let start,expire = make_dates days in
     let privkey = Nocrypto.Rsa.generate length in
-    (* should be user-set too, but keep in mind we may get Invalid_argument for
-                                          nonsense lengths *) 
-    (* can extract the public privkey with Nocrypto.rsa.pub_of_priv *)
     let csr = X509.CA.generate common_name (`RSA privkey) in 
-    let cert = X509.CA.sign (* TODO: let user change the valid period *)
+    let cert = X509.CA.sign ~valid_from:start ~valid_until:expire
         csr (`RSA privkey) issuer in
     let cert_pem = X509.Encoding.Pem.Cert.to_pem_cstruct1 cert in
     let key_pem = X509.Encoding.Pem.PrivateKey.to_pem_cstruct1 privkey in
@@ -81,11 +85,11 @@ let length =
   
 let certfile =
   let doc = "Filename to which to save the completed self-signed certificate." in
-  Arg.(value & opt string "certificate.pem" & info ["c"; "certificate"] ~doc)
+  Arg.(value & opt string "certificate.pem" & info ["c"; "certificate"; "out"] ~doc)
 
 let keyfile =
   let doc = "Filename to which to save the private key for the self-signed certificate." in
-  Arg.(value & opt string "key.pem" & info ["k"; "key"] ~doc)
+  Arg.(value & opt string "key.pem" & info ["k"; "key"; "keyout"] ~doc)
 
 let entropy_src = 
   let doc = "Source for entropy." in
@@ -94,13 +98,19 @@ let entropy_src =
 let common_name = 
   let doc = "Common name for which to issue the certificate." in
   (* TODO: should probably be required *)
-  Arg.(value & opt string "yoyodyne.xyz" & info ["d"; "domain"] ~doc)
+  Arg.(value & opt string "yoyodyne.xyz" & info ["s"; "subj"; "domain"] ~doc)
 
-let certify_t = Term.(pure certify $ issuer $ common_name $ length $ certfile $ keyfile $ entropy_src)
+let days =
+  let doc = "The number of days from the start date on which the certificate will expire." in
+  Arg.(value & opt int 365 & info ["d"; "days"] ~doc)
+
+let certify_t = Term.(pure certify $ issuer $ common_name $ length $ days
+                      $ certfile $ keyfile $ entropy_src)
 
 let info =
   let doc = "generate a self-signed certificate" in
-  let man = [ `S "BUGS"; `P "Submit bugs at https://github.com/yomimono/ocaml-selfsign";] in
+  let man = [ `S "BUGS"; `P "Submit bugs at
+  https://github.com/yomimono/ocaml-certify";] in
   Term.info "certify" ~doc ~man
 
 let () = 
