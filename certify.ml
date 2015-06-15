@@ -36,6 +36,7 @@ let translate_error dest = function
   | (Unix.ENOSPC) -> Write_error "No space left on device"
   | (Unix.EROFS) ->
     Write_error (Printf.sprintf "%s is on a read-only filesystem" dest)
+  | e -> Write_error (Unix.error_message e)
 
 let write_pem dest pem =
   try 
@@ -67,7 +68,7 @@ let certify issuer common_name length certfile keyfile entropy_src =
     let key_pem = X509.Encoding.Pem.PrivateKey.to_pem_cstruct1 privkey in
 
     match (write_pem certfile cert_pem, write_pem keyfile key_pem) with
-    | Ok, Ok -> Printf.printf "cert written to %s\n%!" certfile; `Ok
+    | Ok, Ok -> `Ok
     | Write_error str, _ | _, Write_error str -> Printf.eprintf "%s" str; `Error
 
 let issuer = 
@@ -104,7 +105,7 @@ let info =
 
 let () = 
   match Term.eval (certify_t, info) with 
-  | `Help -> exit 0
-  | `Version -> exit 0
+  | `Help -> exit 0 (* TODO: not clear to me how we generate this case *)
+  | `Version -> exit 0  (* TODO: not clear to me how we generate this case *)
   | `Error _ -> exit 1 
   | `Ok _ -> exit 0
