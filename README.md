@@ -4,7 +4,7 @@ A very small utility for making self-signed certificates and private keys using 
 
 ## Dependencies
 
-`ocaml-selfsign` depends on capabilities in `x509` that are not yet released, but are available on the primary branch of its main repository.  It uses the latest releases of `ocaml-nocrypto` and `cmdliner`.  To get dependencies for ocaml-selfsign via `opam`:
+`ocaml-certify` depends on capabilities in `x509` that are not yet released, but are available on the primary branch of its main repository.  It uses the latest releases of `ocaml-nocrypto` and `cmdliner`.  To get dependencies for ocaml-certify via `opam`:
 
 ```
 opam pin add x509 https://github.com/mirleft/ocaml-x509
@@ -13,4 +13,4 @@ opam install nocrypto cmdliner
 
 ## Running
 
-For help, try `ocaml-selfsign --help`.
+For help, try `ocaml-certify --help`.
