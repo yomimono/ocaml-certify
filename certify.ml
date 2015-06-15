@@ -71,7 +71,7 @@ let selfsign common_name length days certfile keyfile entropy_src =
 
     match (write_pem certfile cert_pem, write_pem keyfile key_pem) with
     | Ok, Ok -> `Ok
-    | Error str, _ | _, Error str -> Printf.eprintf "%s" str; `Error
+    | Error str, _ | _, Error str -> Printf.eprintf "%s\n" str; `Error
 
 let length =
   let doc = "Length of the key in bits." in
