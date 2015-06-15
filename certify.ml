@@ -1,12 +1,8 @@
 open Cmdliner
 
-type write_result =
+type result =
   | Ok
-  | Write_error of string
-
-type entropy_result = 
-  | Ok
-  | Read_error of string
+  | Error of string
 
 let seed_rng entropy_src how_much = 
   try
@@ -18,25 +14,25 @@ let seed_rng entropy_src how_much =
       Nocrypto.Rng.reseed (Cstruct.of_string bytes);
       Ok
     end else
-      Read_error (
+      Error (
         Printf.sprintf "required amount of entropy (%d bytes) wasn't available at %s\n"
           how_much entropy_src)
   with
   | Unix.Unix_error(Unix.ENOENT, _, _)
   | Unix.Unix_error(Unix.ENODEV, _, _) -> 
-    Read_error (Printf.sprintf "source %s doesn't exist -- try another?" entropy_src)
+    Error (Printf.sprintf "source %s doesn't exist -- try another?" entropy_src)
 
 let translate_error dest = function
   | (Unix.EACCES) -> 
-    Write_error (Printf.sprintf "Permission denied writing %s" dest)
+    Error (Printf.sprintf "Permission denied writing %s" dest)
   | (Unix.EISDIR) ->
-    Write_error (Printf.sprintf "%s already exists and is a directory" dest)
+    Error (Printf.sprintf "%s already exists and is a directory" dest)
   | (Unix.ENOENT) ->
-    Write_error (Printf.sprintf "Part of the path %s doesn't exist" dest)
-  | (Unix.ENOSPC) -> Write_error "No space left on device"
+    Error (Printf.sprintf "Part of the path %s doesn't exist" dest)
+  | (Unix.ENOSPC) -> Error "No space left on device"
   | (Unix.EROFS) ->
-    Write_error (Printf.sprintf "%s is on a read-only filesystem" dest)
-  | e -> Write_error (Unix.error_message e)
+    Error (Printf.sprintf "%s is on a read-only filesystem" dest)
+  | e -> Error (Unix.error_message e)
 
 let make_dates days =
   let seconds = days * 24 * 60 * 60 in
@@ -52,14 +48,14 @@ let write_pem dest pem =
          and just handle the exceptions *)
     let _written_bytes = Unix.single_write fd (Cstruct.to_string pem) 0 (Cstruct.len pem) in
     let () = Unix.close fd in
-    (Ok : write_result)
+    Ok
   with
   | Unix.Unix_error (e, _, _) -> translate_error dest e
 
 let certify issuer common_name length days certfile keyfile entropy_src =
   let entropy_amount = 1 in
   match (seed_rng entropy_src entropy_amount) with
-  | Read_error str -> 
+  | Error str -> 
     Printf.eprintf "%s\n" str;
     `Error
   | Ok -> 
@@ -73,7 +69,7 @@ let certify issuer common_name length days certfile keyfile entropy_src =
 
     match (write_pem certfile cert_pem, write_pem keyfile key_pem) with
     | Ok, Ok -> `Ok
-    | Write_error str, _ | _, Write_error str -> Printf.eprintf "%s" str; `Error
+    | Error str, _ | _, Error str -> Printf.eprintf "%s" str; `Error
 
 let issuer = 
   let doc = "Entity to list as issuer of the certificate" in
