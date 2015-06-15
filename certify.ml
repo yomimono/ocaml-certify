@@ -72,8 +72,7 @@ let selfsign common_name length days certfile keyfile entropy_src =
     match (write_pem certfile cert_pem, write_pem keyfile key_pem) with
     | Ok, Ok -> `Ok
     | Error str, _ | _, Error str -> Printf.eprintf "%s" str; `Error
-(* Issuer and subject are the same for self-signed certificates; for CSRs I
-   expect issuer is blank *)
+
 let length =
   let doc = "Length of the key in bits." in
   Arg.(value & opt int 2048 & info ["l"; "length"] ~doc)
@@ -90,13 +89,14 @@ let entropy_src =
   let doc = "Source for entropy." in
   Arg.(value & opt string "/dev/urandom" & info ["e"; "entropy"] ~doc)
 
-let common_name = 
-  let doc = "Common name for which to issue the certificate." in
-  Arg.(required & pos ~rev:false 0 (some string) None & info [""] ~doc)
-
 let days =
   let doc = "The number of days from the start date on which the certificate will expire." in
   Arg.(value & opt int 365 & info ["d"; "days"] ~doc)
+
+let common_name = 
+  let doc = "Common name for which to issue the certificate." in
+  Arg.(required & pos ~rev:false 0 (some string) None & info [] ~doc ~docv:"CN")
+
 
 let selfsign_t = Term.(pure selfsign $ common_name $ length $ days
                       $ certfile $ keyfile $ entropy_src)
