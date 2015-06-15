@@ -1,0 +1,24 @@
+opam-version: "1.2"
+maintainer:   "meetup@yomimono.org"
+homepage:     "https://github.com/yomimono/ocaml-certify"
+dev-repo:     "https://github.com/yomimono/ocaml-certify.git"
+bug-reports:  "https://github.com/yomimono/ocaml-certify/issues"
+authors: [
+  "Mindy Preston"
+]
+tags: ["org:mirage"]
+
+build: [
+  ["./configure" "--prefix" prefix]
+  [make]
+]
+
+install: [make "install"]
+remove: ["ocamlfind" "remove" "ocaml-certify"]
+depends: [
+  "ocamlfind" {build}
+  "ocaml-nocrypto" {>= "0.4.0"}
+  "ocaml-x509" {>= "0.3.1"}
+  "cmdliner"
+]
+available: [ocaml-version >= "4.01.0"]
