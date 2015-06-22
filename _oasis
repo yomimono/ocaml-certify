@@ -11,4 +11,4 @@ Executable certify
  Install: true
  Path: .
  MainIs: certify.ml
- BuildDepends: x509, nocrypto, cmdliner
+ BuildDepends: x509, nocrypto, nocrypto.unix, cmdliner
