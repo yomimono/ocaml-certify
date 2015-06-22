@@ -35,9 +35,18 @@ let translate_error dest = function
   | e -> Error (Unix.error_message e)
 
 let make_dates days =
+  let asn1_of_time time = 
+    let tm = Unix.gmtime time in
+    {
+      Asn.Time.date = Unix.(tm.tm_year, tm.tm_mon, tm.tm_mday);
+      time = Unix.(tm.tm_hour, tm.tm_min, tm.tm_sec, 0.); (* no fractional secs in tm *)
+      (* no tz info in tm, but we got it from gmtime so tzoffset should be 0 *)
+      tz = None;
+    }
+  in
   let seconds = days * 24 * 60 * 60 in
-  let start = Unix.gmtime (Unix.time ()) in
-  let expire = Unix.gmtime (Unix.time () +. (float_of_int seconds)) in
+  let start = asn1_of_time (Unix.time ()) in
+  let expire = asn1_of_time (Unix.time () +. (float_of_int seconds)) in
   (start, expire)
 
 let write_pem dest pem =
@@ -59,15 +68,17 @@ let selfsign common_name length days certfile keyfile entropy_src =
     Printf.eprintf "%s\n" str;
     `Error
   | Ok -> 
-    let issuer = common_name in
+    let (issuer : X509.component list) =
+      [ `CN common_name ]
+    in
     let start,expire = make_dates days in
-    let privkey = Nocrypto.Rsa.generate length in
-    let csr = X509.CA.generate common_name (`RSA privkey) in 
+    let privkey = `RSA (Nocrypto.Rsa.generate length) in
+    let csr = X509.CA.generate issuer privkey in 
     (* it looks like by default we get sha1; can we get sha256 instead? *)
     let cert = X509.CA.sign ~valid_from:start ~valid_until:expire
-        csr (`RSA privkey) issuer in
+        csr privkey issuer in
     let cert_pem = X509.Encoding.Pem.Cert.to_pem_cstruct1 cert in
-    let key_pem = X509.Encoding.Pem.PrivateKey.to_pem_cstruct1 privkey in
+    let key_pem = X509.Encoding.Pem.Private_key.to_pem_cstruct1 privkey in
 
     match (write_pem certfile cert_pem, write_pem keyfile key_pem) with
     | Ok, Ok -> `Ok
