@@ -4,24 +4,6 @@ type result =
   | Ok
   | Error of string
 
-let seed_rng entropy_src how_much = 
-  try
-    let entropy_fd = Unix.openfile entropy_src [Unix.O_RDONLY] 0o000 in
-    let bytes = Bytes.create how_much in
-    let read_entropy = Unix.read entropy_fd bytes 0 how_much in
-    let () = Unix.close entropy_fd in
-    if (read_entropy = how_much) then begin
-      Nocrypto.Rng.reseed (Cstruct.of_string bytes);
-      Ok
-    end else
-      Error (
-        Printf.sprintf "required amount of entropy (%d bytes) wasn't available at %s\n"
-          how_much entropy_src)
-  with
-  | Unix.Unix_error(Unix.ENOENT, _, _)
-  | Unix.Unix_error(Unix.ENODEV, _, _) -> 
-    Error (Printf.sprintf "entropy source %s doesn't exist -- try another?" entropy_src)
-
 let translate_error dest = function
   | (Unix.EACCES) -> 
     Error (Printf.sprintf "Permission denied writing %s" dest)
@@ -38,7 +20,8 @@ let make_dates days =
   let asn1_of_time time = 
     let tm = Unix.gmtime time in
     {
-      Asn.Time.date = Unix.(tm.tm_year, tm.tm_mon, tm.tm_mday);
+      (* irritatingly, posix months and Unix.tm months are differently indexed *)
+      Asn.Time.date = Unix.(tm.tm_year, (tm.tm_mon + 1), tm.tm_mday);
       time = Unix.(tm.tm_hour, tm.tm_min, tm.tm_sec, 0.); (* no fractional secs in tm *)
       (* no tz info in tm, but we got it from gmtime so tzoffset should be 0 *)
       tz = None;
@@ -61,28 +44,23 @@ let write_pem dest pem =
   with
   | Unix.Unix_error (e, _, _) -> translate_error dest e
 
-let selfsign common_name length days certfile keyfile entropy_src =
-  let entropy_amount = 1 in
-  match (seed_rng entropy_src entropy_amount) with
-  | Error str -> 
-    Printf.eprintf "%s\n" str;
-    `Error
-  | Ok -> 
-    let (issuer : X509.component list) =
-      [ `CN common_name ]
-    in
-    let start,expire = make_dates days in
-    let privkey = `RSA (Nocrypto.Rsa.generate length) in
-    let csr = X509.CA.generate issuer privkey in 
-    (* it looks like by default we get sha1; can we get sha256 instead? *)
-    let cert = X509.CA.sign ~valid_from:start ~valid_until:expire
-        csr privkey issuer in
-    let cert_pem = X509.Encoding.Pem.Cert.to_pem_cstruct1 cert in
-    let key_pem = X509.Encoding.Pem.Private_key.to_pem_cstruct1 privkey in
+let selfsign common_name length days certfile keyfile =
+  let (issuer : X509.component list) =
+    [ `CN common_name ]
+  in
+  let start,expire = make_dates days in
+  Nocrypto_entropy_unix.initialize ();
+  let privkey = `RSA (Nocrypto.Rsa.generate length) in
+  let csr = X509.CA.generate issuer privkey in 
+  (* default is sha256; TODO probably should allow user to choose sha1 as well *)
+  let cert = X509.CA.sign ~valid_from:start ~valid_until:expire
+      csr privkey issuer in
+  let cert_pem = X509.Encoding.Pem.Cert.to_pem_cstruct1 cert in
+  let key_pem = X509.Encoding.Pem.Private_key.to_pem_cstruct1 privkey in
 
-    match (write_pem certfile cert_pem, write_pem keyfile key_pem) with
-    | Ok, Ok -> `Ok
-    | Error str, _ | _, Error str -> Printf.eprintf "%s\n" str; `Error
+  match (write_pem certfile cert_pem, write_pem keyfile key_pem) with
+  | Ok, Ok -> `Ok
+  | Error str, _ | _, Error str -> Printf.eprintf "%s\n" str; `Error
 
 let length =
   let doc = "Length of the key in bits." in
@@ -96,10 +74,6 @@ let keyfile =
   let doc = "Filename to which to save the private key for the self-signed certificate." in
   Arg.(value & opt string "key.pem" & info ["k"; "key"; "keyout"] ~doc)
 
-let entropy_src = 
-  let doc = "Source for entropy." in
-  Arg.(value & opt string "/dev/urandom" & info ["e"; "entropy"] ~doc)
-
 let days =
   let doc = "The number of days from the start date on which the certificate will expire." in
   Arg.(value & opt int 365 & info ["d"; "days"] ~doc)
@@ -110,7 +84,7 @@ let common_name =
 
 
 let selfsign_t = Term.(pure selfsign $ common_name $ length $ days
-                      $ certfile $ keyfile $ entropy_src)
+                       $ certfile $ keyfile )
 
 let info =
   let doc = "generate a self-signed certificate" in
