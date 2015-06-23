@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 4eb43961dc5a6ad685fc5e21d02151ca)
+# DO NOT EDIT (digest: a7c60964224345c4fe647f59e63887ed)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -14,13 +14,22 @@ true: annot, bin_annot
 ".git": not_hygienic
 "_darcs": -traverse
 "_darcs": not_hygienic
-# Executable certify
-"certify.byte": pkg_cmdliner
-"certify.byte": pkg_nocrypto
-"certify.byte": pkg_nocrypto.unix
-"certify.byte": pkg_x509
+# Executable selfsign
+"src/selfsign.byte": pkg_cmdliner
+"src/selfsign.byte": pkg_nocrypto
+"src/selfsign.byte": pkg_nocrypto.unix
+"src/selfsign.byte": pkg_x509
+# Executable csr
+"src/csr.byte": pkg_cmdliner
+"src/csr.byte": pkg_nocrypto
+"src/csr.byte": pkg_nocrypto.unix
+"src/csr.byte": pkg_x509
 <*.ml{,i,y}>: pkg_cmdliner
 <*.ml{,i,y}>: pkg_nocrypto
 <*.ml{,i,y}>: pkg_nocrypto.unix
 <*.ml{,i,y}>: pkg_x509
+<src/*.ml{,i,y}>: pkg_cmdliner
+<src/*.ml{,i,y}>: pkg_nocrypto
+<src/*.ml{,i,y}>: pkg_nocrypto.unix
+<src/*.ml{,i,y}>: pkg_x509
 # OASIS_STOP
