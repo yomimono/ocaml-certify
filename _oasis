@@ -7,8 +7,14 @@ Synopsis:    generate self-signed certificates with ocaml-x509 & ocaml-nocrypto
 Plugins:     META (0.4), DevFiles (0.4)
 BuildTools:  ocamlbuild
 
-Executable certify
+Executable selfsign 
  Install: true
  Path: .
- MainIs: certify.ml
- BuildDepends: x509, nocrypto, cmdliner
+ MainIs: src/selfsign.ml
+ BuildDepends: x509, nocrypto, nocrypto.unix, cmdliner
+
+Executable csr
+ Install: true
+ Path: .
+ MainIs: src/csr.ml
+ BuildDepends: x509, nocrypto, nocrypto.unix, cmdliner
