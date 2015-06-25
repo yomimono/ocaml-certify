@@ -8,7 +8,7 @@ A very small utility for making self-signed certificates and private keys using 
 
 ```
 opam pin add x509 https://github.com/mirleft/ocaml-x509.git
-opam pin add nocrypto https://github.com/mirleft/nocrypto.git
+opam pin add nocrypto https://github.com/mirleft/ocaml-nocrypto.git
 opam install nocrypto x509 cmdliner
 ```
 
