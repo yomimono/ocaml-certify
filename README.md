@@ -23,7 +23,7 @@ opam pin add https://github.com/mirleft/ocaml-tls
 To install with opam: 
 
 ```
-opam pin add https://github.com/yomimono/ocaml-certify
+opam pin add ocaml-certify https://github.com/yomimono/ocaml-certify
 opam install ocaml-certify
 ```
 
