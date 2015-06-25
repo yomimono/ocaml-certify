@@ -18,6 +18,25 @@ If you wish to also use `ocaml-tls` or any of its dependencies, you'll need to a
 opam pin add https://github.com/mirleft/ocaml-tls
 ```
 
+## Install
+
+To install with opam: 
+
+```
+opam pin add https://github.com/yomimono/ocaml-certify
+opam install ocaml-certify
+```
+
+Outside of opam:
+
+```
+git clone https://github.com/yomimono/ocaml-certify
+cd ocaml-certify
+./configure
+make
+make install
+```
+
 ## Running
 
 For help, try `selfsign --help` or `csr --help`.
