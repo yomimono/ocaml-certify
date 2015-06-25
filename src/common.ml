@@ -44,23 +44,25 @@ let write_pem dest pem =
   with
   | Unix.Unix_error (e, _, _) -> translate_error dest e
 
+let thing = "self-signed certificate or certificate signing request"
+
 let length =
   let doc = "Length of the key in bits." in
   Arg.(value & opt int 2048 & info ["l"; "length"] ~doc)
   
 let certfile =
-  let doc = "Filename to which to save the completed self-signed certificate." in
+  let doc = "Filename to which to save the completed " ^ thing ^ "." in
   Arg.(value & opt string "certificate.pem" & info ["c"; "certificate"; "out"] ~doc)
 
 let keyfile =
-  let doc = "Filename to which to save the private key for the self-signed certificate." in
+  let doc = "Filename to which to save the private key for the " ^ thing ^ "." in
   Arg.(value & opt string "key.pem" & info ["k"; "key"; "keyout"] ~doc)
 
 let days =
-  let doc = "The number of days from the start date on which the certificate will expire." in
+  let doc = "The number of days from the start date on which the " ^ thing ^ " will expire." in
   Arg.(value & opt int 365 & info ["d"; "days"] ~doc)
 
 let common_name = 
-  let doc = "Common name for which to issue the certificate." in
+  let doc = "Common name for which to issue the " ^ thing ^ "." in
   Arg.(required & pos ~rev:false 0 (some string) None & info [] ~doc ~docv:"CN")
 
