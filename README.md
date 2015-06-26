@@ -4,7 +4,7 @@ A very small utility for making self-signed certificates and private keys using 
 
 ## Dependencies
 
-`ocaml-certify` depends on capabilities in `x509` and `nocrypto` that are available on the primary branch of its main repository but have not yet been released.  It uses the latest release of `cmdliner`.  To get dependencies for ocaml-certify via `opam`:
+`certify` depends on capabilities in `x509` and `nocrypto` that are available on the primary branch of its main repository but have not yet been released.  It uses the latest release of `cmdliner`.  To get dependencies for certify via `opam`:
 
 ```
 opam pin add x509 https://github.com/mirleft/ocaml-x509.git
@@ -23,8 +23,8 @@ opam pin add https://github.com/mirleft/ocaml-tls
 To install with opam: 
 
 ```
-opam pin add ocaml-certify https://github.com/yomimono/ocaml-certify.git
-opam install ocaml-certify
+opam pin add certify https://github.com/yomimono/ocaml-certify.git
+opam install certify
 ```
 
 Outside of opam:

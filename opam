@@ -14,7 +14,7 @@ build: [
 ]
 
 install: [make "install"]
-remove: ["ocamlfind" "remove" "ocaml-certify"]
+remove: ["ocamlfind" "remove" "certify"]
 depends: [
   "ocamlfind" {build}
   "nocrypto" {>= "0.4.0"}

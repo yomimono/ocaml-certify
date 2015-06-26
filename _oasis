@@ -1,9 +1,9 @@
 OASISFormat: 0.4
-Name:        ocaml-certify
+Name:        certify
 Version:     0.1
 License:     ISC
 Authors:     Mindy Preston
-Synopsis:    generate self-signed certificates with ocaml-x509 & ocaml-nocrypto
+Synopsis:    generate self-signed certificates with x509 & nocrypto
 Plugins:     META (0.4), DevFiles (0.4)
 BuildTools:  ocamlbuild
 
