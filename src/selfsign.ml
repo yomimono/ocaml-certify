@@ -1,7 +1,7 @@
 open Cmdliner
 open Common
 
-let selfsign common_name length days certfile keyfile =
+let selfsign common_name length days is_ca certfile keyfile =
   let (issuer : X509.component list) =
     [ `CN common_name ]
   in
@@ -18,7 +18,7 @@ let selfsign common_name length days certfile keyfile =
   | Ok, Ok -> `Ok
   | Error str, _ | _, Error str -> Printf.eprintf "%s\n" str; `Error
 
-let selfsign_t = Term.(pure selfsign $ common_name $ length $ days
+let selfsign_t = Term.(pure selfsign $ common_name $ length $ days $ is_ca
                        $ certfile $ keyfile )
 
 let info =

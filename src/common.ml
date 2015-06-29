@@ -62,6 +62,10 @@ let days =
   let doc = "The number of days from the start date on which the " ^ thing ^ " will expire." in
   Arg.(value & opt int 365 & info ["d"; "days"] ~doc)
 
+let is_ca =
+  let doc = "Sign a CA cert (and include appropriate extensions)." in
+  Arg.(value & flag & info ["C"; "is_ca"] ~doc)
+
 let common_name = 
   let doc = "Common name for which to issue the " ^ thing ^ "." in
   Arg.(required & pos ~rev:false 0 (some string) None & info [] ~doc ~docv:"CN")
