@@ -5,7 +5,7 @@ type result =
   | Error of string
 
 let translate_error dest = function
-  | (Unix.EACCES) -> 
+  | (Unix.EACCES) ->
     Error (Printf.sprintf "Permission denied writing %s" dest)
   | (Unix.EISDIR) ->
     Error (Printf.sprintf "%s already exists and is a directory" dest)
@@ -17,7 +17,7 @@ let translate_error dest = function
   | e -> Error (Unix.error_message e)
 
 let make_dates days =
-  let asn1_of_time time = 
+  let asn1_of_time time =
     let tm = Unix.gmtime time in
     {
       (* irritatingly, posix months and Unix.tm months are differently indexed *)
@@ -33,7 +33,7 @@ let make_dates days =
   (start, expire)
 
 let write_pem dest pem =
-  try 
+  try
     let fd = Unix.openfile dest [Unix.O_WRONLY; Unix.O_CREAT] 0o600 in
     (* single_write promises either complete failure (resulting in an exception)
          or complete success, so disregard the returned number of bytes written
@@ -49,7 +49,7 @@ let thing = "self-signed certificate or certificate signing request"
 let length =
   let doc = "Length of the key in bits." in
   Arg.(value & opt int 2048 & info ["l"; "length"] ~doc)
-  
+
 let certfile =
   let doc = "Filename to which to save the completed " ^ thing ^ "." in
   Arg.(value & opt string "certificate.pem" & info ["c"; "certificate"; "out"] ~doc)
@@ -66,7 +66,7 @@ let is_ca =
   let doc = "Sign a CA cert (and include appropriate extensions)." in
   Arg.(value & flag & info ["C"; "is_ca"] ~doc)
 
-let common_name = 
+let common_name =
   let doc = "Common name for which to issue the " ^ thing ^ "." in
   Arg.(required & pos ~rev:false 0 (some string) None & info [] ~doc ~docv:"CN")
 

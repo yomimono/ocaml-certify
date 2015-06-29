@@ -20,11 +20,11 @@ let csr_t = Term.(pure csr $ org $ common_name $ length $ days $ certfile $ keyf
 
 let info =
   let doc = "generate a certificate-signing request" in
-  let man = [ `S "BUGS"; 
+  let man = [ `S "BUGS";
               `P "Submit bugs at https://github.com/yomimono/ocaml-certify";] in
   Term.info "csr" ~doc ~man
 
 let () =
-  match Term.eval (csr_t, info) with 
+  match Term.eval (csr_t, info) with
   | `Help | `Version | `Ok _ -> exit 0
-  | `Error _ -> exit 1 
+  | `Error _ -> exit 1

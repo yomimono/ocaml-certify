@@ -23,13 +23,13 @@ let selfsign_t = Term.(pure selfsign $ common_name $ length $ days $ is_ca
 
 let info =
   let doc = "generate a self-signed certificate" in
-  let man = [ `S "BUGS"; 
+  let man = [ `S "BUGS";
               `P "Submit bugs at https://github.com/yomimono/ocaml-certify";] in
   Term.info "selfsign" ~doc ~man
 
-let () = 
-  match Term.eval (selfsign_t, info) with 
+let () =
+  match Term.eval (selfsign_t, info) with
   | `Help -> exit 0 (* TODO: not clear to me how we generate this case *)
   | `Version -> exit 0  (* TODO: not clear to me how we generate this case *)
-  | `Error _ -> exit 1 
+  | `Error _ -> exit 1
   | `Ok _ -> exit 0
