@@ -22,7 +22,7 @@ let info =
   let doc = "generate a certificate-signing request" in
   let man = [ `S "BUGS"; 
               `P "Submit bugs at https://github.com/yomimono/ocaml-certify";] in
-  Term.info "csr" ~doc ~man
+  Term.info "csr" ~version:Certify_version.currentversion ~doc ~man
 
 let () =
   match Term.eval (csr_t, info) with 
