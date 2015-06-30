@@ -25,7 +25,7 @@ let info =
   let doc = "generate a self-signed certificate" in
   let man = [ `S "BUGS"; 
               `P "Submit bugs at https://github.com/yomimono/ocaml-certify";] in
-  Term.info "selfsign" ~version:"0.0.1" ~doc ~man
+  Term.info "selfsign" ~Certify_version.currentversion ~doc ~man
 
 let () = 
   match Term.eval (selfsign_t, info) with 
