@@ -1,6 +1,15 @@
 open Cmdliner
 open Common
 
+let ca_extensions =
+  [ (true, (`Basic_constraints (true, None)))
+  ; (true, (`Key_usage [ `Key_cert_sign
+                       ; `CRL_sign
+                       ; `Digital_signature
+                       ; `Content_commitment
+                       ]))
+  ]
+
 let selfsign common_name length days is_ca certfile keyfile =
   let (issuer : X509.component list) =
     [ `CN common_name ]
@@ -8,9 +17,9 @@ let selfsign common_name length days is_ca certfile keyfile =
   let start,expire = make_dates days in
   Nocrypto_entropy_unix.initialize ();
   let privkey = `RSA (Nocrypto.Rsa.generate length) in
+  let ext = if is_ca then ca_extensions else [] in
   let csr = X509.CA.request issuer privkey in
-  (* default is sha256; TODO probably should allow user to choose sha1 as well *)
-  let cert = X509.CA.sign ~valid_from:start ~valid_until:expire
+  let cert = X509.CA.sign ~valid_from:start ~valid_until:expire ~extensions:ext
       csr privkey issuer in
   let cert_pem = X509.Encoding.Pem.Certificate.to_pem_cstruct1 cert in
   let key_pem = X509.Encoding.Pem.Private_key.to_pem_cstruct1 privkey in
