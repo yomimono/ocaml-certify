@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: a7c60964224345c4fe647f59e63887ed)
+# DO NOT EDIT (digest: d397a69104ebf4ba7638a279b3310c03)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -19,6 +19,11 @@ true: annot, bin_annot
 "src/selfsign.byte": pkg_nocrypto
 "src/selfsign.byte": pkg_nocrypto.unix
 "src/selfsign.byte": pkg_x509
+# Executable sign
+"src/sign.byte": pkg_cmdliner
+"src/sign.byte": pkg_nocrypto
+"src/sign.byte": pkg_nocrypto.unix
+"src/sign.byte": pkg_x509
 # Executable csr
 "src/csr.byte": pkg_cmdliner
 "src/csr.byte": pkg_nocrypto
