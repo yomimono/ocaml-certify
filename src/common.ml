@@ -32,6 +32,17 @@ let make_dates days =
   let expire = asn1_of_time (Unix.time () +. (float_of_int seconds)) in
   (start, expire)
 
+let read_pem src =
+  try
+    let stat = Unix.stat src in
+    let buf = Bytes.create (stat.Unix.st_size) in
+    let fd = Unix.openfile src [Unix.O_RDONLY] 0 in
+    let _read_b = Unix.read fd buf 0 stat.Unix.st_size in
+    let () = Unix.close fd in
+    Ok (Cstruct.of_string buf)
+  with
+  | Unix.Unix_error (e, _, _) -> translate_error src e
+
 let write_pem dest pem =
   try
     let fd = Unix.openfile dest [Unix.O_WRONLY; Unix.O_CREAT] 0o600 in
