@@ -13,7 +13,7 @@ let csr org cn length days certfile keyfile =
   let csr_pem = X509.Encoding.Pem.Certificate_signing_request.to_pem_cstruct1 csr in
   let key_pem = X509.Encoding.Pem.Private_key.to_pem_cstruct1 privkey in
   match (write_pem certfile csr_pem, write_pem keyfile key_pem) with
-  | Ok, Ok -> `Ok
+  | Ok (), Ok () -> `Ok
   | Error str, _ | _, Error str -> Printf.eprintf "%s\n" str; `Error
 
 let csr_t = Term.(pure csr $ org $ common_name $ length $ days $ certfile $ keyfile )

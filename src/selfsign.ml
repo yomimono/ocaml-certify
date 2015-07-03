@@ -34,7 +34,7 @@ let selfsign common_name length days is_ca certfile keyfile =
   let cert_pem = X509.Encoding.Pem.Certificate.to_pem_cstruct1 cert in
   let key_pem = X509.Encoding.Pem.Private_key.to_pem_cstruct1 (`RSA privkey) in
   match (write_pem certfile cert_pem, write_pem keyfile key_pem) with
-  | Ok, Ok -> `Ok
+  | Ok (), Ok () -> `Ok
   | Error str, _ | _, Error str -> Printf.eprintf "%s\n" str; `Error
 
 let selfsign_t = Term.(pure selfsign $ common_name $ length $ days $ is_ca

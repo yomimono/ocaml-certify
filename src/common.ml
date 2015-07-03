@@ -1,7 +1,7 @@
 open Cmdliner
 
-type result =
-  | Ok
+type 'a result =
+  | Ok of 'a
   | Error of string
 
 let translate_error dest = function
@@ -40,7 +40,7 @@ let write_pem dest pem =
          and just handle the exceptions *)
     let _written_bytes = Unix.single_write fd (Cstruct.to_string pem) 0 (Cstruct.len pem) in
     let () = Unix.close fd in
-    Ok
+    Ok ()
   with
   | Unix.Unix_error (e, _, _) -> translate_error dest e
 
