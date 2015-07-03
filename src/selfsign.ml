@@ -9,16 +9,12 @@ let selfsign common_name length days is_ca certfile keyfile =
   Nocrypto_entropy_unix.initialize ();
   let privkey = Nocrypto.Rsa.generate length in
   let ext =
-    let pubkey = Nocrypto.Rsa.pub_of_priv privkey in
-    let cs0 = X509.Encoding.rsa_public_to_cstruct pubkey in
-    let cs = Nocrypto.Hash.digest `SHA1 cs0 in
-    let subject_key_id = (false, (`Subject_key_id cs)) in
-    let authority_key_id =
-      let (y : X509.Extension.general_name) =
-	`Directory issuer in
-      let (x : X509.Extension.authority_key_id) =
-	Some cs , [y] , None in
-      (false, (`Authority_key_id x)) in
+    let cs = X509.key_id (`RSA (Nocrypto.Rsa.pub_of_priv privkey)) in
+    let subject_key_id = (false, (`Subject_key_id cs))
+    and authority_key_id =
+      let x = (Some cs, [], None) in
+      (false, (`Authority_key_id x))
+    in
     let ca_extensions =
       if not is_ca then []
       else
@@ -28,8 +24,10 @@ let selfsign common_name length days is_ca certfile keyfile =
                              ; `Digital_signature
                              ; `Content_commitment
                              ]))
-        ] in
-    authority_key_id :: subject_key_id :: ca_extensions in
+        ]
+    in
+    authority_key_id :: subject_key_id :: ca_extensions
+  in
   let csr = X509.CA.request issuer (`RSA privkey) in
   let cert = X509.CA.sign ~valid_from:start ~valid_until:expire ~extensions:ext
       csr (`RSA privkey) issuer in
