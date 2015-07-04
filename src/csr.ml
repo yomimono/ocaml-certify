@@ -8,7 +8,7 @@ let org =
 let csr org cn length days certfile keyfile =
   Nocrypto_entropy_unix.initialize ();
   let privkey = `RSA (Nocrypto.Rsa.generate length) in
-  let dn = [ `CN cn; `O org ] in
+  let dn = [ `CN cn ; `O org ] in
   let csr = X509.CA.request dn privkey in
   let csr_pem = X509.Encoding.Pem.Certificate_signing_request.to_pem_cstruct1 csr in
   let key_pem = X509.Encoding.Pem.Private_key.to_pem_cstruct1 privkey in
