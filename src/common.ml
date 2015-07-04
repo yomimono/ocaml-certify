@@ -32,6 +32,58 @@ let make_dates days =
   let expire = asn1_of_time (Unix.time () +. (float_of_int seconds)) in
   (start, expire)
 
+let sign days key cert csr name entity =
+  let pub =
+    let priv = match key with `RSA k -> k in
+    Nocrypto.Rsa.pub_of_priv priv
+  in
+  match X509.public_key cert with
+  | `RSA pub' when pub = pub' ->
+     Nocrypto_entropy_unix.initialize ();
+     let info = X509.CA.info csr
+     and valid_from, valid_until = make_dates days
+     and issuer = X509.subject cert
+     in
+     let extensions =
+       let subject_key_id =
+         let cs = X509.key_id info.X509.CA.public_key in
+         (false, `Subject_key_id cs)
+       and authority_key_id =
+         let cs = X509.key_id (X509.public_key cert) in
+         let x = (Some cs, [], None) in
+         (false, `Authority_key_id x)
+       and exts =
+         let ku = (true, (`Key_usage [ `Digital_signature ; `Key_encipherment ]))
+         and bc = (true, `Basic_constraints (false, None))
+         in
+         match entity with
+         | `CA ->
+            [ (true, (`Basic_constraints (true, None)))
+            ; (true, (`Key_usage [ `Key_cert_sign
+                                 ; `CRL_sign
+                                 ; `Digital_signature
+                                 ; `Content_commitment
+                                 ]))
+            ]
+         | `Client ->
+            [ bc ; ku
+              ; (true, (`Ext_key_usage [`Client_auth]))
+            ]
+         | `Server ->
+            [ bc ; ku
+              ; (true, (`Ext_key_usage [`Server_auth]))
+            ]
+       in
+       let alt = match name with
+         | None -> []
+         | Some x -> [ (false, `Subject_alt_name [ `DNS x ]) ]
+       in
+       authority_key_id :: subject_key_id :: exts @ alt
+     in
+     let cert = X509.CA.sign ~valid_from ~valid_until ~extensions csr key issuer in
+     Ok cert
+  | _ -> Error "public / private key does not match"
+
 let read_pem src =
   try
     let stat = Unix.stat src in
