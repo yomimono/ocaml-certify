@@ -71,7 +71,6 @@ let extensions subject_pubkey auth_pubkey name entity =
 let sign days key pubkey issuer csr name entity =
   match key, pubkey with
   | `RSA priv, `RSA pub when Nocrypto.Rsa.pub_of_priv priv = pub ->
-     Nocrypto_entropy_unix.initialize ();
      let info = X509.CA.info csr
      and valid_from, valid_until = make_dates days
      in

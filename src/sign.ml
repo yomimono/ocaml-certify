@@ -23,6 +23,7 @@ let sign days is_ca client altname key cacert csr certfile =
      in
      let issuer = X509.subject cacert in
      let pubkey = X509.public_key cacert in
+     Nocrypto_entropy_unix.initialize ();
      (match Common.sign days key pubkey issuer csr name ent with
       | Common.Error str -> Printf.eprintf "%s\n" str; `Error
       | Common.Ok cert ->
