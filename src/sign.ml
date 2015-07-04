@@ -21,7 +21,9 @@ let sign days is_ca client altname key cacert csr certfile =
        else
          None
      in
-     (match Common.sign days key cacert csr name ent with
+     let issuer = X509.subject cacert in
+     let pubkey = X509.public_key cacert in
+     (match Common.sign days key pubkey issuer csr name ent with
       | Common.Error str -> Printf.eprintf "%s\n" str; `Error
       | Common.Ok cert ->
          (match Common.write_pem certfile (X509.Encoding.Pem.Certificate.to_pem_cstruct1 cert) with
