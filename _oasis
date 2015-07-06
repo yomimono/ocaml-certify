@@ -13,6 +13,12 @@ Executable selfsign
  MainIs: src/selfsign.ml
  BuildDepends: x509, nocrypto, nocrypto.unix, cmdliner
 
+Executable sign
+ Install: true
+ Path: .
+ MainIs: src/sign.ml
+ BuildDepends: x509, nocrypto, nocrypto.unix, cmdliner
+
 Executable csr
  Install: true
  Path: .

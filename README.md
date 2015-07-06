@@ -31,4 +31,8 @@ make install
 
 ## Running
 
-For help, try `selfsign --help` or `csr --help`.
+For help, try `selfsign --help`, `sign --help`, or `csr --help`.
+
+- `selfsign` produces a private key and self-signed certificate
+- `sign` takes a certificate signing request, and a CA (key and certificate), and produces a certificate
+- `csr` produces a private key and a certificate signing request
