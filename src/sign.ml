@@ -35,11 +35,11 @@ let sign days is_ca client altname key cacert csr certfile =
   | _, _, Common.Error str -> Printf.eprintf "%s\n" str; `Error
 
 let client =
-  let doc = "Client or server certificate" in
+  let doc = "Add ExtendedKeyUsage extension to be ClientAuth (ServerAuth if absent and not CA)" in
   Arg.(value & flag & info ["client"] ~doc)
 
 let altname =
-  let doc = "include a subjectAltName in certificate" in
+  let doc = "Add SubjectAlternativeName extension where DNSName is CommonName of the subject" in
   Arg.(value & flag & info ["altname"] ~doc)
 
 let keyin =
@@ -64,7 +64,7 @@ let days =
 
 let is_ca =
   let doc = "Sign a CA cert (and include appropriate extensions)." in
-  Arg.(value & flag & info ["C"; "is_ca"] ~doc)
+  Arg.(value & flag & info ["C"; "ca"] ~doc)
 
 let sign_t = Term.(pure sign $ days $ is_ca $ client $ altname $ keyin $ cain $ csrin $ certfile)
 
@@ -76,7 +76,7 @@ let info =
 
 let () =
   match Term.eval (sign_t, info) with
-  | `Help -> exit 0 (* TODO: not clear to me how we generate this case *)
-  | `Version -> exit 0  (* TODO: not clear to me how we generate this case *)
+  | `Help -> exit 1 (* TODO: not clear to me how we generate this case *)
+  | `Version -> exit 1  (* TODO: not clear to me how we generate this case *)
   | `Error _ -> exit 1
   | `Ok _ -> exit 0

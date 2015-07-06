@@ -122,7 +122,7 @@ let days =
 
 let is_ca =
   let doc = "Sign a CA cert (and include appropriate extensions)." in
-  Arg.(value & flag & info ["C"; "is_ca"] ~doc)
+  Arg.(value & flag & info ["C"; "ca"] ~doc)
 
 let common_name =
   let doc = "Common name for which to issue the " ^ thing ^ "." in
