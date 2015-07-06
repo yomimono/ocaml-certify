@@ -29,5 +29,6 @@ let info =
 
 let () = 
   match Term.eval (selfsign_t, info) with 
+  | 'Help -> exit 1
   | `Error _ -> exit 1 
   | `Ok _ -> exit 0
