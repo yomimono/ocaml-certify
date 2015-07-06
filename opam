@@ -17,8 +17,8 @@ install: [make "install"]
 remove: ["ocamlfind" "remove" "certify"]
 depends: [
   "ocamlfind" {build}
-  "nocrypto" {>= "0.4.0"}
-  "x509" {>= "0.3.1"}
+  "nocrypto" {>= "0.5.0"}
+  "x509" {>= "0.4.0"}
   "cmdliner"
 ]
 available: [ocaml-version >= "4.01.0"]
