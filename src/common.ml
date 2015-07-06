@@ -21,7 +21,7 @@ let make_dates days =
     let tm = Unix.gmtime time in
     {
       (* irritatingly, posix months and Unix.tm months are differently indexed *)
-      Asn.Time.date = Unix.(tm.tm_year, (tm.tm_mon + 1), tm.tm_mday);
+      Asn.Time.date = Unix.(tm.tm_year + 1900, (tm.tm_mon + 1), tm.tm_mday);
       time = Unix.(tm.tm_hour, tm.tm_min, tm.tm_sec, 0.); (* no fractional secs in tm *)
       (* no tz info in tm, but we got it from gmtime so tzoffset should be 0 *)
       tz = None;
