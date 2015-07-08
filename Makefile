@@ -1,4 +1,3 @@
-# OASIS_START
 # DO NOT EDIT (digest: a3c674b4239234cbbe53afe090018954)
 VFILE = src/certify_version.ml
 
@@ -45,4 +44,4 @@ $(VFILE): _oasis
 VERSION = $(shell grep 'Version:' _oasis| sed 's/Version: *//')
 
 
-# OASIS_STOP
+
