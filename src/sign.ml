@@ -1,6 +1,6 @@
 open Cmdliner
 
-let sign days is_ca client altname key cacert csr certfile =
+let sign days is_ca client altname key cacert csr certfile altnames =
   match Common.(read_pem key, read_pem cacert, read_pem csr) with
   | Common.Ok key, Common.Ok cacert, Common.Ok csr ->
      let key = X509.Encoding.Pem.Private_key.of_pem_cstruct1 key
@@ -12,19 +12,19 @@ let sign days is_ca client altname key cacert csr certfile =
        | false, true -> `Client
        | false, false -> `Server
      in
-     let name =
+     let names =
        if altname then
          let info = X509.CA.info csr in
          match List.filter (function `CN _ -> true | _ -> false) info.X509.CA.subject with
-         | [ `CN x ] -> Some x
-         | _ -> None
+         | [ `CN x ] -> [ x ]
+         | _ -> []
        else
-         None
-     in
+         []
+     in let names = names @ altnames in
      let issuer = X509.subject cacert in
      let pubkey = X509.public_key cacert in
      Nocrypto_entropy_unix.initialize ();
-     (match Common.sign days key pubkey issuer csr name ent with
+     (match Common.sign days key pubkey issuer csr names ent with
       | Common.Error str -> Printf.eprintf "%s\n" str; `Error
       | Common.Ok cert ->
          (match Common.write_pem certfile (X509.Encoding.Pem.Certificate.to_pem_cstruct1 cert) with
@@ -41,6 +41,10 @@ let client =
 let altname =
   let doc = "Add SubjectAlternativeName extension where DNSName is CommonName of the subject" in
   Arg.(value & flag & info ["altname"] ~doc)
+
+let altnames =
+  let doc = "Add DNSName to SubjectAlternativeName" in
+  Arg.(value & pos_all string [] & info [] ~docv:"ALTNAME" ~doc)
 
 let keyin =
   let doc = "Filename of the private key." in
@@ -66,7 +70,7 @@ let is_ca =
   let doc = "Sign a CA cert (and include appropriate extensions)." in
   Arg.(value & flag & info ["C"; "ca"] ~doc)
 
-let sign_t = Term.(pure sign $ days $ is_ca $ client $ altname $ keyin $ cain $ csrin $ certfile)
+let sign_t = Term.(pure sign $ days $ is_ca $ client $ altname $ keyin $ cain $ csrin $ certfile $ altnames)
 
 let info =
   let doc = "sign a certificate" in
