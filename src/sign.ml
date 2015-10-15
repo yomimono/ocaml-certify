@@ -16,11 +16,11 @@ let sign days is_ca client altname key cacert csr certfile altnames =
        if altname then
          let info = X509.CA.info csr in
          match List.filter (function `CN _ -> true | _ -> false) info.X509.CA.subject with
-         | [ `CN x ] -> [ x ]
-         | _ -> []
+         | [ `CN x ] -> x :: altnames
+         | _ -> altnames
        else
          []
-     in let names = names @ altnames in
+     in
      let issuer = X509.subject cacert in
      let pubkey = X509.public_key cacert in
      Nocrypto_entropy_unix.initialize ();
