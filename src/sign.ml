@@ -1,6 +1,6 @@
 open Cmdliner
 
-let sign days is_ca client altname key cacert csr certfile altnames =
+let sign days is_ca client key cacert csr certfile altnames =
   match Common.(read_pem key, read_pem cacert, read_pem csr) with
   | Common.Ok key, Common.Ok cacert, Common.Ok csr ->
      let key = X509.Encoding.Pem.Private_key.of_pem_cstruct1 key
@@ -13,13 +13,13 @@ let sign days is_ca client altname key cacert csr certfile altnames =
        | false, false -> `Server
      in
      let names =
-       if altname then
+       match altnames with
+       | [] -> []
+       | altnames ->
          let info = X509.CA.info csr in
          match List.filter (function `CN _ -> true | _ -> false) info.X509.CA.subject with
          | [ `CN x ] -> x :: altnames
          | _ -> altnames
-       else
-         []
      in
      let issuer = X509.subject cacert in
      let pubkey = X509.public_key cacert in
@@ -38,13 +38,9 @@ let client =
   let doc = "Add ExtendedKeyUsage extension to be ClientAuth (ServerAuth if absent and not CA)" in
   Arg.(value & flag & info ["client"] ~doc)
 
-let altname =
-  let doc = "Add SubjectAlternativeName extension where DNSName is CommonName of the subject" in
-  Arg.(value & flag & info ["altname"] ~doc)
-
 let altnames =
   let doc = "Add DNSName to SubjectAlternativeName" in
-  Arg.(value & pos_all string [] & info [] ~docv:"ALTNAME" ~doc)
+  Arg.(value & opt_all string [] & info ["altname"] ~doc)
 
 let keyin =
   let doc = "Filename of the private key." in
@@ -70,7 +66,7 @@ let is_ca =
   let doc = "Sign a CA cert (and include appropriate extensions)." in
   Arg.(value & flag & info ["C"; "ca"] ~doc)
 
-let sign_t = Term.(pure sign $ days $ is_ca $ client $ altname $ keyin $ cain $ csrin $ certfile $ altnames)
+let sign_t = Term.(pure sign $ days $ is_ca $ client $ keyin $ cain $ csrin $ certfile $ altnames)
 
 let info =
   let doc = "sign a certificate" in
