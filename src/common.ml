@@ -32,7 +32,7 @@ let make_dates days =
   let expire = asn1_of_time (Unix.time () +. (float_of_int seconds)) in
   (start, expire)
 
-let extensions subject_pubkey auth_pubkey name entity =
+let extensions subject_pubkey auth_pubkey names entity =
   let subject_key_id =
     let cs = X509.key_id subject_pubkey in
     (false, `Subject_key_id cs)
@@ -62,19 +62,19 @@ let extensions subject_pubkey auth_pubkey name entity =
          ; (true, (`Ext_key_usage [`Server_auth]))
        ]
   in
-  let alt = match name with
-    | None -> []
-    | Some x -> [ (false, `Subject_alt_name [ `DNS x ]) ]
+  let alts = match names with
+    | [] -> []
+    | _ -> [ (false, `Subject_alt_name ( List.map (fun x -> `DNS x) names)) ]
   in
-  authority_key_id :: subject_key_id :: exts @ alt
+  authority_key_id :: subject_key_id :: exts @ alts
 
-let sign days key pubkey issuer csr name entity =
+let sign days key pubkey issuer csr names entity =
   match key, pubkey with
   | `RSA priv, `RSA pub when Nocrypto.Rsa.pub_of_priv priv = pub ->
      let info = X509.CA.info csr
      and valid_from, valid_until = make_dates days
      in
-     let extensions = extensions info.X509.CA.public_key pubkey name entity in
+     let extensions = extensions info.X509.CA.public_key pubkey names entity in
      let cert = X509.CA.sign ~valid_from ~valid_until ~extensions csr key issuer in
      Ok cert
   | _ -> Error "public / private keys do not match"

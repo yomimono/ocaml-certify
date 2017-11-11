@@ -8,7 +8,7 @@ let selfsign common_name length days is_ca certfile keyfile =
   in
   let csr = X509.CA.request issuer (`RSA privkey) in
   let ent = if is_ca then `CA else `Server in
-  match Common.sign days (`RSA privkey) (`RSA (Nocrypto.Rsa.pub_of_priv privkey)) issuer csr None ent with
+  match Common.sign days (`RSA privkey) (`RSA (Nocrypto.Rsa.pub_of_priv privkey)) issuer csr [] ent with
   | Ok cert ->
      let cert_pem = X509.Encoding.Pem.Certificate.to_pem_cstruct1 cert in
      let key_pem = X509.Encoding.Pem.Private_key.to_pem_cstruct1 (`RSA privkey) in
