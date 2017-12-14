@@ -86,7 +86,7 @@ let read_pem src =
     let fd = Unix.openfile src [Unix.O_RDONLY] 0 in
     let _read_b = Unix.read fd buf 0 stat.Unix.st_size in
     let () = Unix.close fd in
-    Ok (Cstruct.of_string buf)
+    Ok (Cstruct.of_bytes buf)
   with
   | Unix.Unix_error (e, _, _) -> translate_error src e
 
@@ -96,7 +96,7 @@ let write_pem dest pem =
     (* single_write promises either complete failure (resulting in an exception)
          or complete success, so disregard the returned number of bytes written
          and just handle the exceptions *)
-    let _written_bytes = Unix.single_write fd (Cstruct.to_string pem) 0 (Cstruct.len pem) in
+    let _written_bytes = Unix.single_write fd (Cstruct.to_bytes pem) 0 (Cstruct.len pem) in
     let () = Unix.close fd in
     Ok ()
   with
