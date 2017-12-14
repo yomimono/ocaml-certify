@@ -2,4 +2,6 @@ true: annot, bin_annot, safe_string
 true: warn(A-4-41-44-45)
 
 "src": include
-<src/*>: package(asn1-combinators), package(nocrypto), package(cmdliner), package(x509), package(nocrypto.unix), package(cmdliner)
+<src/*>: package(nocrypto), package(cmdliner), \
+         package(x509), package(nocrypto.unix), package(cmdliner), \
+         package(ptime), package(ptime.clock.os)

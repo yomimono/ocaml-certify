@@ -1,6 +1,6 @@
 description = "Utility for signing x509 certificates and creating CSRs"
 version = "%%VERSION_NUM%%"
-requires = "x509 nocrypto asn1-combinators cmdliner"
+requires = "x509 nocrypto cmdliner cstruct ptime"
 archive(byte) = "certify.cma"
 archive(native) = "certify.cmxa"
 plugin(byte) = "certify.cma"

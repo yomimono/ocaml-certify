@@ -5,7 +5,7 @@ let org =
   let doc = "Organization name for the certificate signing request." in
   Arg.(required & pos ~rev:false 1 (some string) None & info [] ~doc ~docv:"O")
 
-let csr org cn length days certfile keyfile =
+let csr org cn length certfile keyfile =
   Nocrypto_entropy_unix.initialize ();
   let privkey = `RSA (Nocrypto.Rsa.generate length) in
   let dn = [ `CN cn ; `O org ] in
@@ -16,7 +16,7 @@ let csr org cn length days certfile keyfile =
   | Ok (), Ok () -> `Ok
   | Error str, _ | _, Error str -> Printf.eprintf "%s\n" str; `Error
 
-let csr_t = Term.(pure csr $ org $ common_name $ length $ days $ certfile $ keyfile )
+let csr_t = Term.(pure csr $ org $ common_name $ length $ certfile $ keyfile )
 
 let info =
   let doc = "generate a certificate-signing request" in
