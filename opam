@@ -19,6 +19,8 @@ depends: [
   "x509" {>= "0.4.0"}
   "cstruct" {>= "3.2.0"}
   "ptime"
-  "cmdliner"
+  "cmdliner" {>= "1.0.0"}
+  "bos" {test}
+  "conf-openssl" {test}
 ]
 available: [ocaml-version >= "4.01.0" & ocaml-version < "4.06.0"]
