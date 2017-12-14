@@ -9,17 +9,16 @@ authors: [
 tags: ["org:mirage"]
 
 build: [
-  ["./configure" "--prefix" prefix]
-  [make]
+  ["ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"]
 ]
 
-install: [make "install"]
-remove: ["ocamlfind" "remove" "certify"]
 depends: [
   "ocamlfind" {build}
-  "asn1-combinators" {< "0.2.0"}
+  "topkg" {build}
+  "asn1-combinators" {>= "0.2.0"}
   "nocrypto" {>= "0.5.0"}
   "x509" {>= "0.4.0"}
+  "cstruct" {>= "3.2.0"}
   "cmdliner"
 ]
 available: [ocaml-version >= "4.01.0" & ocaml-version < "4.06.0"]

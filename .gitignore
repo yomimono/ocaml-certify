@@ -4,3 +4,4 @@ setup.data
 setup.log
 *.ml.swp
 *.byte
+certify.install
