@@ -35,7 +35,8 @@ let sign days is_ca client key cacert csr certfile altnames =
   | _, _, Common.Error str -> Printf.eprintf "%s\n" str; `Error
 
 let client =
-  let doc = "Add ExtendedKeyUsage extension to be ClientAuth (ServerAuth if absent and not CA)" in
+  let doc = "Add ExtendedKeyUsage extension to be ClientAuth \
+             (ServerAuth if absent and not CA)" in
   Arg.(value & flag & info ["client"] ~doc)
 
 let altnames =
@@ -68,15 +69,10 @@ let is_ca =
 
 let sign_t = Term.(pure sign $ days $ is_ca $ client $ keyin $ cain $ csrin $ certfile $ altnames)
 
-let info =
+let sign_info =
   let doc = "sign a certificate" in
   let man = [ `S "BUGS";
               `P "Submit bugs at https://github.com/yomimono/ocaml-certify";] in
   Term.info "sign" ~doc ~man
 
-let () =
-  match Term.eval (sign_t, info) with
-  | `Help -> exit 1 (* TODO: not clear to me how we generate this case *)
-  | `Version -> exit 1  (* TODO: not clear to me how we generate this case *)
-  | `Error _ -> exit 1
-  | `Ok _ -> exit 0
+let () = Term.(exit @@ eval (sign_t, sign_info))

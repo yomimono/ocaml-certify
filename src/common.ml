@@ -17,20 +17,11 @@ let translate_error dest = function
   | e -> Error (Unix.error_message e)
 
 let make_dates days =
-  let asn1_of_time time =
-    let tm = Unix.gmtime time in
-    {
-      (* irritatingly, posix months and Unix.tm months are differently indexed *)
-      Asn.Time.date = Unix.(tm.tm_year + 1900, (tm.tm_mon + 1), tm.tm_mday);
-      time = Unix.(tm.tm_hour, tm.tm_min, tm.tm_sec, 0.); (* no fractional secs in tm *)
-      (* no tz info in tm, but we got it from gmtime so tzoffset should be 0 *)
-      tz = None;
-    }
-  in
   let seconds = days * 24 * 60 * 60 in
-  let start = asn1_of_time (Unix.time ()) in
-  let expire = asn1_of_time (Unix.time () +. (float_of_int seconds)) in
-  (start, expire)
+  let start = Ptime_clock.now () in
+  match Ptime.(add_span start @@ Span.of_int_s seconds) with
+  | Some expire -> Some (start, expire)
+  | None -> None
 
 let extensions subject_pubkey auth_pubkey names entity =
   let subject_key_id =
@@ -69,15 +60,16 @@ let extensions subject_pubkey auth_pubkey names entity =
   authority_key_id :: subject_key_id :: exts @ alts
 
 let sign days key pubkey issuer csr names entity =
-  match key, pubkey with
-  | `RSA priv, `RSA pub when Nocrypto.Rsa.pub_of_priv priv = pub ->
-     let info = X509.CA.info csr
-     and valid_from, valid_until = make_dates days
-     in
-     let extensions = extensions info.X509.CA.public_key pubkey names entity in
-     let cert = X509.CA.sign ~valid_from ~valid_until ~extensions csr key issuer in
-     Ok cert
-  | _ -> Error "public / private keys do not match"
+  match make_dates days with
+  | None -> Error "Validity period is too long to express - try a shorter one"
+  | Some (valid_from, valid_until) ->
+    match key, pubkey with
+    | `RSA priv, `RSA pub when Nocrypto.Rsa.pub_of_priv priv = pub ->
+      let info = X509.CA.info csr in
+      let extensions = extensions info.X509.CA.public_key pubkey names entity in
+      let cert = X509.CA.sign ~valid_from ~valid_until ~extensions csr key issuer in
+      Ok cert
+    | _ -> Error "public / private keys do not match"
 
 let read_pem src =
   try
