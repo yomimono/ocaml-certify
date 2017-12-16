@@ -1,5 +1,4 @@
 _build
-*.pem
 setup.data
 setup.log
 *.ml.swp
