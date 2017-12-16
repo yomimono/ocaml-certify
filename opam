@@ -1,7 +1,7 @@
-opam-version: "1.2"
+opam-version: "2.0"
 maintainer:   "meetup@yomimono.org"
 homepage:     "https://github.com/yomimono/ocaml-certify"
-dev-repo:     "https://github.com/yomimono/ocaml-certify.git"
+dev-repo:     "git+https://github.com/yomimono/ocaml-certify.git"
 bug-reports:  "https://github.com/yomimono/ocaml-certify/issues"
 authors: [
   "Mindy Preston"
@@ -11,10 +11,9 @@ tags: ["org:mirage"]
 build: [
   ["ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"]
 ]
-build-test: [
-  ["ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"]
+run-test: [
   ["test/test.sh"]
-  ["timeout" "--preserve-status" "30m" "bun" "-i" "test_input/certs" "-o" "/tmp/bun_output" "_build/src/sign.native" "--" "--cain=test_input/certs/ca_out.pem" "--keyin=test_input/ca_key.pem" "--csrin"]
+  ["timeout" "--preserve-status" "30m" "afl-fuzz" "-i" "test_input/certs" "-o" "/tmp/bun_output" "_build/src/sign.native" "--cain=test_input/certs/ca_out.pem" "--keyin=test_input/ca_key.pem" "--csrin" "@@"]
 ]
 depends: [
   "ocamlfind" {build}
@@ -24,7 +23,7 @@ depends: [
   "cstruct" {>= "3.2.0"}
   "ptime"
   "cmdliner" {>= "1.0.0"}
+  "ocaml" {>= "4.01.0"}
   "conf-openssl" {test}
   "bun" {test}
 ]
-available: [ocaml-version >= "4.01.0"]
