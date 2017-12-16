@@ -3,6 +3,7 @@
 set -e
 
 [ "${EXTENSION}" = "" ] && EXTENSION=.native
+[ "${BINDIR}" = "" ] && BINDIR="_build/src"
 [ "${CERTDIR}" = "" ] && CERTDIR="/tmp/$$"
 [ "${KEYDIR}" = "" ] && KEYDIR="/tmp/$$"
 [ "${OPENSSL}" = "" ] && OPENSSL="openssl"
@@ -53,5 +54,5 @@ ${OPENSSL} verify -CAfile ${CERTDIR}/ca_out.pem ${CERTDIR}/signed_csr.pem
 
 rm ${CERTDIR}/ca_out.pem ${CERTDIR}/signed_csr.pem ${CERTDIR}/csr.pem
 rm ${KEYDIR}/ca_key.pem ${KEYDIR}/csr_key.pem
-rmdir ${CERTDIR}
 [ "${CERTDIR}" != "${KEYDIR}" ] && rmdir ${KEYDIR}
+rmdir ${CERTDIR}

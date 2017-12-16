@@ -12,7 +12,9 @@ build: [
   ["ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"]
 ]
 build-test: [
-  ["BINDIR=_build/src" "test/test.sh"]
+  ["ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"]
+  ["test/test.sh"]
+  ["timeout" "--preserve-status" "30m" "bun" "-i" "test_input/certs" "-o" "/tmp/bun_output" "_build/src/sign.native" "--" "--cain=test_input/certs/ca_out.pem" "--keyin=test_input/ca_key.pem" "--csrin"]
 ]
 depends: [
   "ocamlfind" {build}
@@ -22,6 +24,7 @@ depends: [
   "cstruct" {>= "3.2.0"}
   "ptime"
   "cmdliner" {>= "1.0.0"}
-  "conf-ssl" {test}
+  "conf-openssl" {test}
+  "bun" {test}
 ]
 available: [ocaml-version >= "4.01.0"]
