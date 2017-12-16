@@ -1,0 +1,18 @@
+language: c
+# need yomimono's custom fork of ocaml-ci-scripts to make HUB_USER meaningful for the moment
+install: wget https://raw.githubusercontent.com/yomimono/ocaml-ci-scripts/custom-hub-user/.travis-docker.sh
+script: bash -ex .travis-docker.sh
+env:
+        global:
+                - HUB_USER=yomimono #need this to get afl-instrumented OCaml compilers
+                - DISTRO=debian-9 #afl-instrumented compilers are here only
+                - PINS="spawn:https://github.com/yomimono/spawn.git#pthread bun:https://github.com/yomimono/ocaml-bun.git" #not yet released & needed for tests
+                - PACKAGE="certify"
+        matrix:
+                - OCAML_VERSION=4.04.0_afl #need afl instrumentation for tests
+                - OCAML_VERSION=4.05.0_afl
+                - OCAML_VERSION=4.06.0_afl
+
+before_install:
+        # this is needed for afl-fuzz
+        - sudo sysctl kernel.core_pattern=core
