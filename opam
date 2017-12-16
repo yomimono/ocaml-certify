@@ -11,7 +11,10 @@ tags: ["org:mirage"]
 build: [
   ["ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"]
 ]
-
+build-test: [
+  ["ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"]
+  ["test/test.sh"]
+]
 depends: [
   "ocamlfind" {build}
   "topkg" {build}
@@ -20,7 +23,6 @@ depends: [
   "cstruct" {>= "3.2.0"}
   "ptime"
   "cmdliner" {>= "1.0.0"}
-  "bos" {test}
   "conf-openssl" {test}
 ]
 available: [ocaml-version >= "4.01.0"]
