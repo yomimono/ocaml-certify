@@ -45,7 +45,7 @@ let altnames =
 
 let keyin =
   let doc = "Filename of the private key." in
-  Arg.(value & opt string "key.pem" & info ["keyin"] ~doc)
+  Arg.(value & opt string "key.pem" & info ["keyin";"key"] ~doc)
 
 let cain =
   let doc = "Filename of the CA certificate." in
