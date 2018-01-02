@@ -26,4 +26,4 @@ For help, try `selfsign --help`, `sign --help`, or `csr --help`.
 
 ## Tests
 
-Simple `openssl` interoperability tests are in `tests/test.sh`.  Additional tests using [american fuzzy lop](http://lcamtuf.coredump.cx/afl) to test the robustness of `sign` when given arbitrary data as a CSR are automatically run via [bun](https://github.com/yomimono/ocaml-bun) when `certify` is installed with `opam install -t`.
+Simple `openssl` interoperability tests are in `tests/test.sh`.
