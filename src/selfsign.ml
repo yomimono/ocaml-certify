@@ -18,6 +18,10 @@ let selfsign common_name length days is_ca certfile keyfile =
       | _, Error str -> Printf.eprintf "%s\n" str; `Error)
   | Error str -> Printf.eprintf "%s\n" str; `Error
 
+let certfile =
+  let doc = "Filename to which to save the completed certificate." in
+  Arg.(value & opt string "certificate.pem" & info ["c"; "certificate"; "out"] ~doc)
+
 let selfsign_t = Term.(pure selfsign $ common_name $ length $ days $ is_ca
                        $ certfile $ keyfile )
 

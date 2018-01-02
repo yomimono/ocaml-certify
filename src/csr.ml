@@ -5,6 +5,10 @@ let org =
   let doc = "Organization name for the certificate signing request." in
   Arg.(required & pos ~rev:false 1 (some string) None & info [] ~doc ~docv:"O")
 
+let certfile =
+  let doc = "Filename to which to save the completed certificate-signing request." in
+  Arg.(value & opt string "csr.pem" & info ["c"; "certificate"; "csr"; "out"] ~doc)
+
 let csr org cn length certfile keyfile =
   Nocrypto_entropy_unix.initialize ();
   let privkey = `RSA (Nocrypto.Rsa.generate length) in

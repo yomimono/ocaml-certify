@@ -100,10 +100,6 @@ let length =
   let doc = "Length of the key in bits." in
   Arg.(value & opt int 2048 & info ["l"; "length"] ~doc)
 
-let certfile =
-  let doc = "Filename to which to save the completed " ^ thing ^ "." in
-  Arg.(value & opt string "certificate.pem" & info ["c"; "certificate"; "out"] ~doc)
-
 let keyfile =
   let doc = "Filename to which to save the private key for the " ^ thing ^ "." in
   Arg.(value & opt string "key.pem" & info ["k"; "key"; "keyout"] ~doc)
