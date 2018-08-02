@@ -27,5 +27,3 @@ let csr_info =
   let man = [ `S "BUGS";
               `P "Submit bugs at https://github.com/yomimono/ocaml-certify";] in
   Term.info "csr" ~doc ~man
-
-let () = Term.(exit @@ eval (csr_t, csr_info))
