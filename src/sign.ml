@@ -74,5 +74,3 @@ let sign_info =
   let man = [ `S "BUGS";
               `P "Submit bugs at https://github.com/yomimono/ocaml-certify";] in
   Term.info "sign" ~doc ~man
-
-let () = Term.(exit @@ eval (sign_t, sign_info))

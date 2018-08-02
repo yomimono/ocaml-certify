@@ -30,5 +30,3 @@ let selfsign_info =
   let man = [ `S "BUGS";
               `P "Submit bugs at https://github.com/yomimono/ocaml-certify";] in
   Term.info "selfsign" ~doc ~man
-
-let () = Term.(exit @@ eval (selfsign_t, selfsign_info))

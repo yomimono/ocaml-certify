@@ -6,7 +6,5 @@ open Topkg
 let () =
   Pkg.describe "certify" @@ fun _c ->
   Ok [
-    Pkg.bin "src/csr";
-    Pkg.bin "src/selfsign";
-    Pkg.bin "src/sign";
+    Pkg.bin "src/certify";
   ]
