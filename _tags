@@ -1,7 +1,0 @@
-true: annot, bin_annot, safe_string
-true: warn(A-4-41-44-45-48)
-
-"src": include
-<src/*>: package(nocrypto), package(cmdliner), package(cstruct), \
-         package(x509), package(nocrypto.unix), package(cmdliner), \
-         package(ptime), package(ptime.clock.os)

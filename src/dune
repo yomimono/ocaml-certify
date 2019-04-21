@@ -1,0 +1,23 @@
+(library
+  (name certify_cli)
+  (modules common)
+  (wrapped false)
+  (libraries nocrypto cmdliner cstruct x509 nocrypto.unix ptime ptime.clock.os))
+
+(executable
+  (name csr)
+  (public_name csr)
+  (modules csr)
+  (libraries certify_cli))
+
+(executable
+  (name selfsign)
+  (public_name selfsign)
+  (modules selfsign)
+  (libraries certify_cli))
+
+(executable
+  (name sign)
+  (public_name sign)
+  (modules sign)
+  (libraries certify_cli))
