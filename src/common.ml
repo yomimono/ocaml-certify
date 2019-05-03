@@ -1,20 +1,16 @@
 open Cmdliner
 
-type 'a result =
-  | Ok of 'a
-  | Error of string
-
 let translate_error dest = function
   | (Unix.EACCES) ->
-    Error (Printf.sprintf "Permission denied writing %s" dest)
+    Error (`Msg (Printf.sprintf "Permission denied writing %s" dest))
   | (Unix.EISDIR) ->
-    Error (Printf.sprintf "%s already exists and is a directory" dest)
+    Error (`Msg (Printf.sprintf "%s already exists and is a directory" dest))
   | (Unix.ENOENT) ->
-    Error (Printf.sprintf "Part of the path %s doesn't exist" dest)
-  | (Unix.ENOSPC) -> Error "No space left on device"
+    Error (`Msg (Printf.sprintf "Part of the path %s doesn't exist" dest))
+  | (Unix.ENOSPC) -> Error (`Msg "No space left on device")
   | (Unix.EROFS) ->
-    Error (Printf.sprintf "%s is on a read-only filesystem" dest)
-  | e -> Error (Unix.error_message e)
+    Error (`Msg (Printf.sprintf "%s is on a read-only filesystem" dest))
+  | e -> Error (`Msg (Unix.error_message e))
 
 let make_dates days =
   let seconds = days * 24 * 60 * 60 in
@@ -61,7 +57,7 @@ let extensions subject_pubkey auth_pubkey names entity =
 
 let sign days key pubkey issuer csr names entity =
   match make_dates days with
-  | None -> Error "Validity period is too long to express - try a shorter one"
+  | None -> Error (`Msg "Validity period is too long to express - try a shorter one")
   | Some (valid_from, valid_until) ->
     match key, pubkey with
     | `RSA priv, `RSA pub when Nocrypto.Rsa.pub_of_priv priv = pub ->
@@ -69,7 +65,7 @@ let sign days key pubkey issuer csr names entity =
       let extensions = extensions info.X509.CA.public_key pubkey names entity in
       let cert = X509.CA.sign ~valid_from ~valid_until ~extensions csr key issuer in
       Ok cert
-    | _ -> Error "public / private keys do not match"
+    | _ -> Error (`Msg "public / private keys do not match")
 
 let read_pem src =
   try
