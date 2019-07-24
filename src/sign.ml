@@ -2,7 +2,7 @@ open Cmdliner
 
 let sign days is_ca client key cacert csr certfile altnames =
   match Common.(read_pem key, read_pem cacert, read_pem csr) with
-  | Common.Ok key, Common.Ok cacert, Common.Ok csr ->
+  | Ok key, Ok cacert, Ok csr ->
      let key = X509.Encoding.Pem.Private_key.of_pem_cstruct1 key
      and cacert = X509.Encoding.Pem.Certificate.of_pem_cstruct1 cacert
      and csr = X509.Encoding.Pem.Certificate_signing_request.of_pem_cstruct1 csr
@@ -25,14 +25,12 @@ let sign days is_ca client key cacert csr certfile altnames =
      let pubkey = X509.public_key cacert in
      Nocrypto_entropy_unix.initialize ();
      (match Common.sign days key pubkey issuer csr names ent with
-      | Common.Error str -> Printf.eprintf "%s\n" str; `Error
-      | Common.Ok cert ->
-         (match Common.write_pem certfile (X509.Encoding.Pem.Certificate.to_pem_cstruct1 cert) with
-          | Common.Ok () -> `Ok
-          | Common.Error str -> Printf.eprintf "%s\n" str; `Error))
-  | Common.Error str, _, _
-  | _, Common.Error str, _
-  | _, _, Common.Error str -> Printf.eprintf "%s\n" str; `Error
+      | Error str -> Error str
+      | Ok cert ->
+        Common.write_pem certfile (X509.Encoding.Pem.Certificate.to_pem_cstruct1 cert))
+  | Error str, _, _
+  | _, Error str, _
+  | _, _, Error str -> Error str
 
 let client =
   let doc = "Add ExtendedKeyUsage extension to be ClientAuth \
@@ -67,7 +65,7 @@ let is_ca =
   let doc = "Sign a CA cert (and include appropriate extensions)." in
   Arg.(value & flag & info ["C"; "ca"] ~doc)
 
-let sign_t = Term.(pure sign $ days $ is_ca $ client $ keyin $ cain $ csrin $ certfile $ altnames)
+let sign_t = Term.(term_result (pure sign $ days $ is_ca $ client $ keyin $ cain $ csrin $ certfile $ altnames))
 
 let sign_info =
   let doc = "sign a certificate" in
