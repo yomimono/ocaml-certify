@@ -22,7 +22,7 @@ ${OPENSSL} x509 -in ${CERTDIR}/ca_out.pem -text -noout >/dev/null
 ${OPENSSL} rsa -in ${KEYDIR}/ca_key.pem -text -noout >/dev/null
 
 # make sure the key length is what we asked for
-actual_length=$(${OPENSSL} x509 -in ${CERTDIR}/ca_out.pem -text -noout | grep Public-Key|sed 's/Public-Key: (//;s/ bit)//;s/ //g')
+actual_length=$(${OPENSSL} x509 -in ${CERTDIR}/ca_out.pem -text -noout | grep Public-Key|sed 's/Public-Key: (//;s/ bit)//;s/ //g;s/^RSA//')
 [ "$actual_length" != "${KEY_LENGTH}" ] && {
 	echo "Key length $actual_length was not the requested $KEY_LENGTH"
 	exit 1
