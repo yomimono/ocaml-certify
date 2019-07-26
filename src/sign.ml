@@ -2,35 +2,40 @@ open Cmdliner
 
 let sign days is_ca client key cacert csr certfile altnames =
   match Common.(read_pem key, read_pem cacert, read_pem csr) with
-  | Ok key, Ok cacert, Ok csr ->
-     let key = X509.Encoding.Pem.Private_key.of_pem_cstruct1 key
-     and cacert = X509.Encoding.Pem.Certificate.of_pem_cstruct1 cacert
-     and csr = X509.Encoding.Pem.Certificate_signing_request.of_pem_cstruct1 csr
-     in
-     let ent = match is_ca, client with
-       | true, _ -> `CA
-       | false, true -> `Client
-       | false, false -> `Server
-     in
-     let names =
-       match altnames with
-       | [] -> []
-       | altnames ->
-         let info = X509.CA.info csr in
-         match List.filter (function `CN _ -> true | _ -> false) info.X509.CA.subject with
-         | [ `CN x ] -> x :: altnames
-         | _ -> altnames
-     in
-     let issuer = X509.subject cacert in
-     let pubkey = X509.public_key cacert in
-     Nocrypto_entropy_unix.initialize ();
-     (match Common.sign days key pubkey issuer csr names ent with
-      | Error str -> Error str
-      | Ok cert ->
-        Common.write_pem certfile (X509.Encoding.Pem.Certificate.to_pem_cstruct1 cert))
   | Error str, _, _
   | _, Error str, _
   | _, _, Error str -> Error str
+  | Ok key, Ok cacert, Ok csr ->
+    match
+      X509.Private_key.decode_pem key,
+      X509.Certificate.decode_pem cacert,
+      X509.Signing_request.decode_pem csr
+    with
+    | Error (`Msg e), _, _
+    | _, Error (`Msg e), _
+    | _, _, Error (`Msg e) -> Error (`Msg e)
+    | Ok key, Ok cacert, Ok csr ->
+      let ent = match is_ca, client with
+        | true, _ -> `CA
+        | false, true -> `Client
+        | false, false -> `Server
+      in
+      let names =
+        match altnames with
+        | [] -> []
+        | altnames ->
+          let info = X509.Signing_request.info csr in
+          match X509.Distinguished_name.(find CN info.X509.Signing_request.subject) with
+          | Some x -> x :: altnames
+          | None -> altnames
+      in
+      let issuer = X509.Certificate.subject cacert in
+      let pubkey = X509.Certificate.public_key cacert in
+      Nocrypto_entropy_unix.initialize ();
+      match Common.sign days key pubkey issuer csr names ent with
+      | Error str -> Error str
+      | Ok cert ->
+        Common.write_pem certfile (X509.Certificate.encode_pem cert)
 
 let client =
   let doc = "Add ExtendedKeyUsage extension to be ClientAuth \

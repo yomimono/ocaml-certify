@@ -20,40 +20,40 @@ let make_dates days =
   | None -> None
 
 let extensions subject_pubkey auth_pubkey names entity =
-  let subject_key_id =
-    let cs = X509.key_id subject_pubkey in
-    (false, `Subject_key_id cs)
-  and authority_key_id =
-    let cs = X509.key_id auth_pubkey in
-    let x = (Some cs, [], None) in
-    (false, `Authority_key_id x)
-  and exts =
-    let ku = (true, (`Key_usage [ `Digital_signature ; `Key_encipherment ]))
-    and bc = (true, `Basic_constraints (false, None))
+  let open X509 in
+  let extensions =
+    let auth = Some (Public_key.id auth_pubkey), General_name.empty, None in
+    Extension.(add Subject_key_id (false, Public_key.id subject_pubkey)
+                 (singleton Authority_key_id (false, auth)))
+  in
+  let extensions = match names with
+    | [] -> extensions
+    | _ ->
+      let names =
+        List.fold_left (fun s x ->
+            Domain_name.Set.add (Domain_name.of_string_exn x) s)
+          Domain_name.Set.empty names
+      in
+      Extension.(add Subject_alt_name
+                   (false, General_name.(singleton DNS names)) extensions)
+  in
+
+  let leaf_extensions =
+    Extension.(add Key_usage (true, [ `Digital_signature ; `Key_encipherment ])
+                 (add Basic_constraints (true, (false, None))
+                    extensions))
+  in
+  match entity with
+  | `CA ->
+    let ku =
+      [ `Key_cert_sign ; `CRL_sign ; `Digital_signature ; `Content_commitment ]
     in
-    match entity with
-    | `CA ->
-       [ (true, (`Basic_constraints (true, None)))
-       ; (true, (`Key_usage [ `Key_cert_sign
-                            ; `CRL_sign
-                            ; `Digital_signature
-                            ; `Content_commitment
-                            ]))
-       ]
-    | `Client ->
-       [ bc ; ku
-         ; (true, (`Ext_key_usage [`Client_auth]))
-       ]
-    | `Server ->
-       [ bc ; ku
-         ; (true, (`Ext_key_usage [`Server_auth]))
-       ]
-  in
-  let alts = match names with
-    | [] -> []
-    | _ -> [ (false, `Subject_alt_name ( List.map (fun x -> `DNS x) names)) ]
-  in
-  authority_key_id :: subject_key_id :: exts @ alts
+    Extension.(add Basic_constraints (true, (true, None))
+                 (add Key_usage (true, ku) extensions))
+  | `Client ->
+    Extension.(add Ext_key_usage (true, [`Client_auth]) leaf_extensions)
+  | `Server ->
+    Extension.(add Ext_key_usage (true, [`Server_auth]) leaf_extensions)
 
 let sign days key pubkey issuer csr names entity =
   match make_dates days with
@@ -61,9 +61,9 @@ let sign days key pubkey issuer csr names entity =
   | Some (valid_from, valid_until) ->
     match key, pubkey with
     | `RSA priv, `RSA pub when Nocrypto.Rsa.pub_of_priv priv = pub ->
-      let info = X509.CA.info csr in
-      let extensions = extensions info.X509.CA.public_key pubkey names entity in
-      let cert = X509.CA.sign ~valid_from ~valid_until ~extensions csr key issuer in
+      let info = X509.Signing_request.info csr in
+      let extensions = extensions info.X509.Signing_request.public_key pubkey names entity in
+      let cert = X509.Signing_request.sign ~valid_from ~valid_until ~extensions csr key issuer in
       Ok cert
     | _ -> Error (`Msg "public / private keys do not match")
 
