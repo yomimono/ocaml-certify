@@ -2,8 +2,8 @@
 
 set -e
 
-[ "${EXTENSION}" = "" ] && EXTENSION=.native
-[ "${BINDIR}" = "" ] && BINDIR="_build/src"
+[ "${EXTENSION}" = "" ] #&& EXTENSION=.native
+[ "${BINDIR}" = "" ] && BINDIR="_build/install/default/bin"
 [ "${CERTDIR}" = "" ] && CERTDIR="/tmp/$$"
 [ "${KEYDIR}" = "" ] && KEYDIR="/tmp/$$"
 [ "${OPENSSL}" = "" ] && OPENSSL="openssl"
@@ -15,7 +15,7 @@ set -e
 [ "$SILENT" = "" ] && echo "Testing ${BINDIR}/selfsign$EXTENSION ..."
 
 # make a self-signed CA cert
-${BINDIR}/selfsign${EXTENSION} --ca --certificate=${CERTDIR}/ca_out.pem -d 730 --keyout=${KEYDIR}/ca_key.pem --length=${KEY_LENGTH} ca.example.com
+${BINDIR}/certify${EXTENSION} selfsign --ca --certificate=${CERTDIR}/ca_out.pem -d 730 --keyout=${KEYDIR}/ca_key.pem --length=${KEY_LENGTH} ca.example.com
 # make sure openssl can read the generated CA
 ${OPENSSL} x509 -in ${CERTDIR}/ca_out.pem -text -noout >/dev/null
 # make sure the key is usable
@@ -29,7 +29,7 @@ actual_length=$(${OPENSSL} x509 -in ${CERTDIR}/ca_out.pem -text -noout | grep Pu
 }
 
 # make sure silly key lengths are refused
-${BINDIR}/selfsign${EXTENSION} --certificate=${CERTDIR}/too_short.pem --keyout=${KEY_DIR}/too_short_key.pem --length=12 too-short.example.com 2>/dev/null && {
+${BINDIR}/certify${EXTENSION} selfsign --certificate=${CERTDIR}/too_short.pem --keyout=${KEY_DIR}/too_short_key.pem --length=12 too-short.example.com 2>/dev/null && {
 	echo "Bogus key length 12 passed to selfsign was not detected as expected"
 	exit 1
 }
@@ -37,7 +37,7 @@ ${BINDIR}/selfsign${EXTENSION} --certificate=${CERTDIR}/too_short.pem --keyout=$
 [ "$SILENT" = "" ] && echo "Testing ${BINDIR}/csr$EXTENSION ..."
 
 # generate a csr
-${BINDIR}/csr${EXTENSION} --certificate=${CERTDIR}/csr.pem --key=${KEYDIR}/csr_key.pem -l ${KEY_LENGTH} notaca.example.com "Exampleton Studios"
+${BINDIR}/certify${EXTENSION} csr --certificate=${CERTDIR}/csr.pem --key=${KEYDIR}/csr_key.pem -l ${KEY_LENGTH} notaca.example.com "Exampleton Studios"
 # make sure the key is usable
 ${OPENSSL} rsa -in ${KEYDIR}/csr_key.pem -text -noout >/dev/null
 # "verify" the csr
@@ -46,7 +46,7 @@ ${OPENSSL} req -verify -in ${CERTDIR}/csr.pem -text -noout >/dev/null
 [ "$SILENT" = "" ] && echo "Testing ${BINDIR}/sign$EXTENSION ..."
 
 # sign csr with ca
-${BINDIR}/sign${EXTENSION} --certificate=${CERTDIR}/signed_csr.pem --cain=${CERTDIR}/ca_out.pem --csrin=${CERTDIR}/csr.pem --keyin=${KEYDIR}/ca_key.pem
+${BINDIR}/certify${EXTENSION} sign --certificate=${CERTDIR}/signed_csr.pem --cain=${CERTDIR}/ca_out.pem --csrin=${CERTDIR}/csr.pem --keyin=${KEYDIR}/ca_key.pem
 # make sure openssl can read the signed cert
 ${OPENSSL} x509 -in ${CERTDIR}/signed_csr.pem -text -noout >/dev/null
 # make sure the signed cert is valid with respect to the trust anchor
