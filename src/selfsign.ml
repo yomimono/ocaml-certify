@@ -22,13 +22,12 @@ let certfile =
   let doc = "Filename to which to save the completed certificate." in
   Arg.(value & opt string "certificate.pem" & info ["c"; "certificate"; "out"] ~doc)
 
-let selfsign_t = Term.(pure selfsign $ common_name $ length $ days $ is_ca
-                       $ certfile $ keyfile )
+let selfsign_t = Term.(term_result (pure selfsign $ common_name
+                                      $ length $ days $ is_ca
+                                      $ certfile $ keyfile ))
 
 let selfsign_info =
   let doc = "generate a self-signed certificate" in
   let man = [ `S "BUGS";
               `P "Submit bugs at https://github.com/yomimono/ocaml-certify";] in
   Term.info "selfsign" ~doc ~man
-
-let () = Term.(exit @@ eval (selfsign_t, selfsign_info))
