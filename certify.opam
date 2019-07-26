@@ -3,6 +3,7 @@ maintainer:  ["maintenance@identity-function.com"]
 homepage:     "https://github.com/yomimono/ocaml-certify"
 dev-repo:     "git+https://github.com/yomimono/ocaml-certify.git"
 bug-reports:  "https://github.com/yomimono/ocaml-certify/issues"
+doc:          "https://yomimono.github.io/ocaml-certify/doc"
 synopsis:     "CLI utilities for simple X509 certificate manipulation"
 authors: [
   "Mindy Preston"
