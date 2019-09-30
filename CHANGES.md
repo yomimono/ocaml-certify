@@ -1,3 +1,6 @@
+## v0.3.1 (2019-09-30):
+* maintenance: use newer x509 (v0.7.1) (@hannesm)
+
 ## v0.3 (2019-07-26):
 * breaking change: `sign`, `selfsign`, and `csr` are now subcommands of a `certify` binary.  To update your workflow, simply prepend `certify` to any command you previously ran. (@reynir)
 * improvements: allow --key for key filename in `sign`; write to csr.pem by default in `csr`. (@yomimono)
