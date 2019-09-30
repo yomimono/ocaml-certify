@@ -29,11 +29,6 @@ let extensions subject_pubkey auth_pubkey names entity =
   let extensions = match names with
     | [] -> extensions
     | _ ->
-      let names =
-        List.fold_left (fun s x ->
-            Domain_name.Set.add (Domain_name.of_string_exn x) s)
-          Domain_name.Set.empty names
-      in
       Extension.(add Subject_alt_name
                    (false, General_name.(singleton DNS names)) extensions)
   in
