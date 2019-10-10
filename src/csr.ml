@@ -12,7 +12,11 @@ let certfile =
 let csr org cn length certfile keyfile =
   Nocrypto_entropy_unix.initialize ();
   let privkey = `RSA (Nocrypto.Rsa.generate length) in
-  let dn = X509.Distinguished_name.(add CN cn (singleton O org)) in
+  let dn = X509.Distinguished_name.[
+      Relative_distinguished_name.(singleton (CN cn)) ;
+      Relative_distinguished_name.(singleton (O org)) ;
+    ]
+  in
   let csr = X509.Signing_request.create dn privkey in
   let csr_pem = X509.Signing_request.encode_pem csr in
   let key_pem = X509.Private_key.encode_pem privkey in

@@ -24,8 +24,7 @@ let sign days is_ca client key cacert csr certfile altnames =
         match altnames with
         | [] -> []
         | altnames ->
-          let info = X509.Signing_request.info csr in
-          match X509.Distinguished_name.(find CN info.X509.Signing_request.subject) with
+          match X509.(Distinguished_name.common_name Signing_request.((info csr).subject)) with
           | Some x -> x :: altnames
           | None -> altnames
       in
