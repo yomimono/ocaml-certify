@@ -1,3 +1,6 @@
+## v0.3.2 (2019-11-02):
+* maintenance: use newer yet x509 (v0.8.0) (@hannesm)
+
 ## v0.3.1 (2019-09-30):
 * maintenance: use newer x509 (v0.7.1) (@hannesm)
 
