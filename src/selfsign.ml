@@ -1,10 +1,11 @@
 open Cmdliner
 open Common
 
-let selfsign common_name length days is_ca certfile keyfile =
+let selfsign name length days is_ca certfile keyfile =
   Nocrypto_entropy_unix.initialize ();
   let privkey = Nocrypto.Rsa.generate length
-  and issuer = X509.Distinguished_name.(singleton CN common_name)
+  and issuer =
+    [ X509.Distinguished_name.(Relative_distinguished_name.singleton (CN name)) ]
   in
   let csr = X509.Signing_request.create issuer (`RSA privkey) in
   let ent = if is_ca then `CA else `Server in
