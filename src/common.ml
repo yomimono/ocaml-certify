@@ -59,7 +59,7 @@ let sign days key pubkey issuer csr names entity =
       let info = X509.Signing_request.info csr in
       let extensions = extensions info.X509.Signing_request.public_key pubkey names entity in
       let cert = X509.Signing_request.sign ~valid_from ~valid_until ~extensions csr key issuer in
-      Ok cert
+      cert
     | _ -> Error (`Msg "public / private keys do not match")
 
 let read_pem src =
