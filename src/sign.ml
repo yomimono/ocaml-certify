@@ -30,7 +30,7 @@ let sign days is_ca client key cacert csr certfile altnames =
       in
       let issuer = X509.Certificate.subject cacert in
       let pubkey = X509.Certificate.public_key cacert in
-      Nocrypto_entropy_unix.initialize ();
+      Mirage_crypto_rng_unix.initialize ();
       match Common.sign days key pubkey issuer csr names ent with
       | Error str -> Error str
       | Ok cert ->
