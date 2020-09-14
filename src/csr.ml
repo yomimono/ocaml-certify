@@ -10,8 +10,8 @@ let certfile =
   Arg.(value & opt string "csr.pem" & info ["c"; "certificate"; "csr"; "out"] ~doc)
 
 let csr org cn length certfile keyfile =
-  Nocrypto_entropy_unix.initialize ();
-  let privkey = `RSA (Nocrypto.Rsa.generate length) in
+  Mirage_crypto_rng_unix.initialize ();
+  let privkey = `RSA (Mirage_crypto_pk.Rsa.generate ~bits:length ()) in
   let dn = X509.Distinguished_name.[
       Relative_distinguished_name.(singleton (CN cn)) ;
       Relative_distinguished_name.(singleton (O org)) ;

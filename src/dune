@@ -2,7 +2,7 @@
   (name certify_cli)
   (modules common)
   (wrapped false)
-  (libraries nocrypto cmdliner cstruct x509 nocrypto.unix ptime ptime.clock.os))
+  (libraries mirage-crypto mirage-crypto-pk mirage-crypto-rng.unix cmdliner cstruct x509 ptime ptime.clock.os))
 
 (executable
   (name certify)
