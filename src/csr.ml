@@ -17,12 +17,14 @@ let csr org cn bits certfile keyfile =
       Relative_distinguished_name.(singleton (O org)) ;
     ]
   in
-  let csr = X509.Signing_request.create dn privkey in
-  let csr_pem = X509.Signing_request.encode_pem csr in
-  let key_pem = X509.Private_key.encode_pem privkey in
-  match (write_pem certfile csr_pem, write_pem keyfile key_pem) with
-  | Ok (), Ok () -> Ok ()
-  | Error str, _ | _, Error str -> Error str
+  match X509.Signing_request.create dn privkey with
+  | Error _ as e -> e
+  | Ok csr ->
+    let csr_pem = X509.Signing_request.encode_pem csr in
+    let key_pem = X509.Private_key.encode_pem privkey in
+    match (write_pem certfile csr_pem, write_pem keyfile key_pem) with
+    | Ok (), Ok () -> Ok ()
+    | Error str, _ | _, Error str -> Error str
 
 let csr_t = Term.(term_result (pure csr $ org $ common_name $ length $ certfile $ keyfile))
 
