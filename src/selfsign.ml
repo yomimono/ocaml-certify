@@ -1,15 +1,15 @@
 open Cmdliner
 open Common
 
-let selfsign name length days is_ca certfile keyfile =
-  Nocrypto_entropy_unix.initialize ();
-  let privkey = Nocrypto.Rsa.generate length
+let selfsign name bits days is_ca certfile keyfile =
+  Mirage_crypto_rng_unix.initialize ();
+  let privkey = Mirage_crypto_pk.Rsa.generate ~bits ()
   and issuer =
     [ X509.Distinguished_name.(Relative_distinguished_name.singleton (CN name)) ]
   in
   let csr = X509.Signing_request.create issuer (`RSA privkey) in
   let ent = if is_ca then `CA else `Server in
-  match Common.sign days (`RSA privkey) (`RSA (Nocrypto.Rsa.pub_of_priv privkey)) issuer csr [] ent with
+  match Common.sign days (`RSA privkey) (`RSA (Mirage_crypto_pk.Rsa.pub_of_priv privkey)) issuer csr [] ent with
   | Ok cert ->
      let cert_pem = X509.Certificate.encode_pem cert in
      let key_pem = X509.Private_key.encode_pem (`RSA privkey) in

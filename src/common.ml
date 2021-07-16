@@ -55,11 +55,11 @@ let sign days key pubkey issuer csr names entity =
   | None -> Error (`Msg "Validity period is too long to express - try a shorter one")
   | Some (valid_from, valid_until) ->
     match key, pubkey with
-    | `RSA priv, `RSA pub when Nocrypto.Rsa.pub_of_priv priv = pub ->
+    | `RSA priv, `RSA pub when Mirage_crypto_pk.Rsa.pub_of_priv priv = pub ->
       let info = X509.Signing_request.info csr in
       let extensions = extensions info.X509.Signing_request.public_key pubkey names entity in
-      let cert = X509.Signing_request.sign ~valid_from ~valid_until ~extensions csr key issuer in
-      Ok cert
+      Rresult.R.error_to_msg ~pp_error:X509.Validation.pp_signature_error
+        (X509.Signing_request.sign ~valid_from ~valid_until ~extensions csr key issuer)
     | _ -> Error (`Msg "public / private keys do not match")
 
 let read_pem src =
