@@ -4,8 +4,8 @@ set -e
 
 [ "${EXTENSION}" = "" ] #&& EXTENSION=.native
 [ "${BINDIR}" = "" ] && BINDIR="_build/install/default/bin"
-[ "${CERTDIR}" = "" ] && CERTDIR="/tmp/$$"
-[ "${KEYDIR}" = "" ] && KEYDIR="/tmp/$$"
+[ "${CERTDIR}" = "" ] && CERTDIR=$(mktemp -d)
+[ "${KEYDIR}" = "" ] && KEYDIR=$(mktemp -d)
 [ "${OPENSSL}" = "" ] && OPENSSL="openssl"
 [ "${KEY_LENGTH}" = "" ] && KEY_LENGTH=4096
 
