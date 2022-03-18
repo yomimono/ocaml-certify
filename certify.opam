@@ -24,6 +24,7 @@ depends: [
   "ocaml" {>= "4.07.0"}
   "cmdliner" {>= "1.0.0"}
   "conf-openssl" {with-test}
+  "rresult"
 ]
 description: """
 `certify` is a small selection of useful utilities for manipulating X509 certificates and public keys.  It uses the mirleft organization's x509, tls, and nocrypto libraries.
