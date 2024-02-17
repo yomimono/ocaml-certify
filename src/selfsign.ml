@@ -2,7 +2,7 @@ open Cmdliner
 open Common
 
 let selfsign name bits days is_ca certfile keyfile =
-  Mirage_crypto_rng_unix.initialize ();
+  Mirage_crypto_rng_unix.initialize (module Mirage_crypto_rng.Fortuna);
   let privkey = Mirage_crypto_pk.Rsa.generate ~bits ()
   and issuer =
     [ X509.Distinguished_name.(Relative_distinguished_name.singleton (CN name)) ]
@@ -25,12 +25,10 @@ let certfile =
   let doc = "Filename to which to save the completed certificate." in
   Arg.(value & opt string "certificate.pem" & info ["c"; "certificate"; "out"] ~doc)
 
-let selfsign_t = Term.(term_result (pure selfsign $ common_name
-                                      $ length $ days $ is_ca
-                                      $ certfile $ keyfile ))
-
-let selfsign_info =
+let info =
   let doc = "generate a self-signed certificate" in
   let man = [ `S "BUGS";
               `P "Submit bugs at https://github.com/yomimono/ocaml-certify";] in
-  Term.info "selfsign" ~doc ~man
+  Cmd.info "selfsign" ~doc ~man
+
+let selfsign_t = Cmd.v info Term.(term_result (const selfsign $ common_name $ length $ days $ is_ca $ certfile $ keyfile ))

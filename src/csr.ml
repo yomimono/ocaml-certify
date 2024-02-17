@@ -10,7 +10,7 @@ let certfile =
   Arg.(value & opt string "csr.pem" & info ["c"; "certificate"; "csr"; "out"] ~doc)
 
 let csr org cn bits certfile keyfile =
-  Mirage_crypto_rng_unix.initialize ();
+  Mirage_crypto_rng_unix.initialize (module Mirage_crypto_rng.Fortuna);
   let privkey = `RSA (Mirage_crypto_pk.Rsa.generate ~bits ()) in
   let dn = X509.Distinguished_name.[
       Relative_distinguished_name.(singleton (CN cn)) ;
@@ -26,10 +26,10 @@ let csr org cn bits certfile keyfile =
     | Ok (), Ok () -> Ok ()
     | Error str, _ | _, Error str -> Error str
 
-let csr_t = Term.(term_result (pure csr $ org $ common_name $ length $ certfile $ keyfile))
-
-let csr_info =
+let info =
   let doc = "generate a certificate-signing request" in
   let man = [ `S "BUGS";
               `P "Submit bugs at https://github.com/yomimono/ocaml-certify";] in
-  Term.info "csr" ~doc ~man
+  Cmd.info "csr" ~doc ~man
+
+  let csr_t = Cmd.v info Term.(term_result (const csr $ org $ common_name $ length $ certfile $ keyfile))
