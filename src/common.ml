@@ -55,11 +55,13 @@ let sign days key pubkey issuer csr names entity =
   | None -> Error (`Msg "Validity period is too long to express - try a shorter one")
   | Some (valid_from, valid_until) ->
     match key, pubkey with
-    | `RSA priv, `RSA pub when Mirage_crypto_pk.Rsa.pub_of_priv priv = pub ->
+    | `RSA priv, `RSA pub when Mirage_crypto_pk.Rsa.pub_of_priv priv = pub -> (
       let info = X509.Signing_request.info csr in
       let extensions = extensions info.X509.Signing_request.public_key pubkey names entity in
-      Rresult.R.error_to_msg ~pp_error:X509.Validation.pp_signature_error
-        (X509.Signing_request.sign ~valid_from ~valid_until ~extensions csr key issuer)
+      match X509.Signing_request.sign ~valid_from ~valid_until ~extensions csr key issuer with
+      | Ok certificate -> Ok certificate
+      | Error signature_error -> Error (`Msg (Fmt.to_to_string X509.Validation.pp_signature_error signature_error))
+    )
     | _ -> Error (`Msg "public / private keys do not match")
 
 let read_pem src =
@@ -79,7 +81,7 @@ let write_pem dest pem =
     (* single_write promises either complete failure (resulting in an exception)
          or complete success, so disregard the returned number of bytes written
          and just handle the exceptions *)
-    let _written_bytes = Unix.single_write fd (Cstruct.to_bytes pem) 0 (Cstruct.len pem) in
+    let _written_bytes = Unix.single_write fd (Cstruct.to_bytes pem) 0 (Cstruct.length pem) in
     let () = Unix.close fd in
     Ok ()
   with

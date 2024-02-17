@@ -30,7 +30,7 @@ let sign days is_ca client key cacert csr certfile altnames =
       in
       let issuer = X509.Certificate.subject cacert in
       let pubkey = X509.Certificate.public_key cacert in
-      Mirage_crypto_rng_unix.initialize ();
+      Mirage_crypto_rng_unix.initialize (module Mirage_crypto_rng.Fortuna);
       match Common.sign days key pubkey issuer csr names ent with
       | Error str -> Error str
       | Ok cert ->
@@ -69,10 +69,10 @@ let is_ca =
   let doc = "Sign a CA cert (and include appropriate extensions)." in
   Arg.(value & flag & info ["C"; "ca"] ~doc)
 
-let sign_t = Term.(term_result (pure sign $ days $ is_ca $ client $ keyin $ cain $ csrin $ certfile $ altnames))
-
-let sign_info =
+let info =
   let doc = "sign a certificate" in
   let man = [ `S "BUGS";
               `P "Submit bugs at https://github.com/yomimono/ocaml-certify";] in
-  Term.info "sign" ~doc ~man
+  Cmd.info "sign" ~doc ~man
+
+let sign_t = Cmd.v info Term.(term_result (const sign $ days $ is_ca $ client $ keyin $ cain $ csrin $ certfile $ altnames))
